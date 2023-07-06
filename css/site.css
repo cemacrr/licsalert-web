@@ -1,0 +1,38 @@
+/** body: **/
+
+body {
+  background-color: #484848;
+  margin: 0;
+  padding: 0;
+}
+
+/** content: **/
+
+.licsalert_plot_container {
+  background-color: #ffffff;
+  width: 98%;
+  margin: auto;
+  margin-top: 2em;
+  display: flex;
+  flex: 1 1 auto;
+  flex-flow: row nowrap;
+}
+
+.licsalert_ic_plot {
+  display: flex;
+  flex: 1 1 auto;
+  max-height: 250px;
+  max-width: 250px;
+}
+
+.licsalert_ts_plot {
+  display: flex;
+  flex: 1 1 auto;
+  max-height: 250px;
+}
+
+.js-plotly-plot .plotly .modebar {
+  margin-top: 0.5em;
+  left: 0.5em;
+  min-width: 12em;
+}
