@@ -6,12 +6,23 @@
 var plot_vars = {
   /* prefix for data: */
   'data_prefix': 'data/',
+  /* store plot data here: */
+  'plot_data': null,
+  /* div for dem plotting: */
+  'dem_plot_div': document.getElementById('licsalert_dem_plot'),
+  /* min and max for dem plotting: */
+  'dem_min': 0,
+  'dem_max': 1000,
+  /* colorscale for dem plotting: */
+  'dem_colorscale': [
+    [0, 'rgb(85, 142, 49)'],
+    [0.5, 'rgb(217, 216, 98)'],
+    [1, 'rgb(96, 17, 5)'],
+  ],
   /* div for ic plotting: */
   'ic_plot_div': document.getElementById('licsalert_ic_plot'),
   /* div for time series plotting: */
   'ts_plot_div': document.getElementById('licsalert_ts_plot'),
-  /* store plot data here: */
-  'plot_data': null,
   /* min and max for ic plotting: */
   'ic_min': -0.5,
   'ic_max': 0.5,
@@ -59,7 +70,12 @@ async function load_data(data_file) {
 
 /* data plotting function: */
 function plot_data() {
+
   /* get required plotting variables: */
+  var dem_plot_div = plot_vars['dem_plot_div'];
+  var dem_min = plot_vars['dem_min'];
+  var dem_max = plot_vars['dem_max'];
+  var dem_colorscale = plot_vars['dem_colorscale'];
   var ic_plot_div = plot_vars['ic_plot_div'];
   var ts_plot_div = plot_vars['ts_plot_div'];
   var ic_min = plot_vars['ic_min'];
@@ -94,6 +110,122 @@ function plot_data() {
   var lats_max = Math.max.apply(Math, lats);
   var lons_min = Math.min.apply(Math, lons);
   var lons_max = Math.max.apply(Math, lons);
+
+
+  /* dem plot: */
+
+  var heatmap_dem_data = [];
+
+  var heatmap_dem_hovertext = [];
+  for (var i = 0; i < lons.length; i++) {
+    heatmap_dem_hovertext[i] = [];
+    for (var j = 0; j < lats.length; j++) {
+      heatmap_dem_hovertext[i][j] = 'lon: ' + lons[i] + '<br>' +
+                                    'lat: ' + lats[i] + '<br>' +
+                                    'elevation: ' + dem[i][j] + 'm';
+      };
+  };
+
+  var heatmap_dem_colorbar = {
+    'tickvals': [dem_min, dem_max],
+    'orientation': 'v',
+    'thickness': 15,
+    'len': 0.9
+  };
+
+  var heatmap_dem = {
+    'type': 'heatmap',
+    'x': lons,
+    'y': lats,
+    'z': dem,
+    'zmin': dem_min,
+    'zmax': dem_max,
+    'colorscale': dem_colorscale,
+    'colorbar': heatmap_dem_colorbar,
+    'hoverinfo': 'text',
+    'text': heatmap_dem_hovertext,
+    'showlegend': false
+  };
+  heatmap_dem_data.push(heatmap_dem);
+
+  var heatmap_dem_xticks = [];
+  var heatmap_dem_yticks = [];
+  var heatmap_dem_nticks = 2;
+  var heatmap_dem_xtick_inc = (lons_max - lons_min) / (heatmap_dem_nticks * 2);
+  for (var i = 0; i < heatmap_dem_nticks; i++) {
+    heatmap_dem_xticks.push(
+      (lons_min + ((i + (i +1)) * heatmap_dem_xtick_inc)).toFixed(2)
+    );
+  };
+  var heatmap_dem_ytick_inc = (lats_max - lats_min) / (heatmap_dem_nticks * 2);
+  for (var i = 0; i < heatmap_dem_nticks; i++) {
+    heatmap_dem_yticks.push(
+      (lats_min + ((i + (i +1)) * heatmap_dem_ytick_inc)).toFixed(2)
+    );
+  };
+
+  var heatmap_dem_layout = {
+    'title': {
+      'text': ''
+    },
+    'xaxis': {
+      'title': '',
+      'tickmode': 'array',
+      'tickvals': heatmap_dem_xticks,
+      'range': [lons_min, lons_max],
+      'autorange': false,
+      'constrain': 'domain',
+      'scaleanchor': 'y',
+      'scaleratio': 1,
+      'zeroline': false,
+      'showline': true,
+      'showgrid': true,
+      'mirror': true
+    },
+    'yaxis': {
+      'title': '',
+      'tickmode': 'array',
+      'tickvals': heatmap_dem_yticks,
+      'range': [lats_min, lats_max],
+      'autorange': false,
+      'constrain': 'domain',
+      'zeroline': false,
+      'showline': true,
+      'showgrid': true,
+      'mirror': true
+    },
+    'modebar': {
+      'orientation': 'h',
+    },
+    'margin': {
+      't': 50,
+      'b': 50,
+      'r': 50,
+      'l': 50
+    },
+  };
+
+  var heatmap_dem_conf = {
+    'showLink': false,
+    'linkText': '',
+    'displaylogo': false,
+    'modeBarButtonsToRemove': [
+      'autoScale2d',
+      'lasso2d',
+      'toggleSpikelines',
+      'select2d'
+    ],
+    'responsive': true
+  };
+
+
+  var heatmap_dem_plot = Plotly.newPlot(
+    dem_plot_div, heatmap_dem_data, heatmap_dem_layout, heatmap_dem_conf
+  );
+
+
+
+
 
   /* ic plot: */
 

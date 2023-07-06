@@ -15,7 +15,15 @@ body {
   margin-top: 2em;
   display: flex;
   flex: 1 1 auto;
-  flex-flow: row nowrap;
+  flex-flow: row wrap;
+//  justify-content: space-around;
+}
+
+.licsalert_dem_plot {
+  display: flex;
+  flex: 1 1 auto;
+  max-height: 250px;
+  max-width: 250px;
 }
 
 .licsalert_ic_plot {
