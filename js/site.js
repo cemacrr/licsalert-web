@@ -144,9 +144,16 @@ function plot_data() {
   for (var i = 0; i < lats.length; i++) {
     heatmap_dem_hovertext[i] = [];
     for (var j = 0; j < lons.length; j++) {
+
+      if (dem[i][j] == 'null') {
+        var value_text = 'null';
+      } else {
+        var value_text = dem[i][j] + 'm';
+      };
+
       heatmap_dem_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
                                     'lon: ' + lons[j] + '<br>' +
-                                    'elevation: ' + dem[i][j] + 'm';
+                                    'elevation: ' + value_text;
       };
   };
 
@@ -262,9 +269,16 @@ function plot_data() {
   for (var i = 0; i < lats.length; i++) {
     heatmap_ifg_cml_hovertext[i] = [];
     for (var j = 0; j < lons.length; j++) {
+
+      if (ifg_cml[i][j] == 'null') {
+        var value_text = 'null';
+      } else {
+        var value_text = ifg_cml[i][j];
+      };
+
       heatmap_ifg_cml_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
                                         'lon: ' + lons[j] + '<br>' +
-                                        ifg_cml[i][j];
+                                        value_text;
       };
   };
 
@@ -376,9 +390,16 @@ function plot_data() {
   for (var i = 0; i < lats.length; i++) {
     heatmap_ifg_inc_hovertext[i] = [];
     for (var j = 0; j < lons.length; j++) {
+
+      if (ifg_inc[i][j] == 'null') {
+        var value_text = 'null';
+      } else {
+        var value_text = ifg_inc[i][j];
+      };
+
       heatmap_ifg_inc_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
                                         'lon: ' + lons[j] + '<br>' +
-                                        ifg_inc[i][j];
+                                        value_text;
       };
   };
 
@@ -487,9 +508,16 @@ function plot_data() {
   for (var i = 0; i < lats.length; i++) {
     heatmap_hovertext[i] = [];
     for (var j = 0; j < lons.length; j++) {
+
+      if (tc_sources[0][i][j] == 'null') {
+        var value_text = 'null';
+      } else {
+        var value_text = tc_sources[0][i][j] + 'm';
+      };
+
       heatmap_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
                                 'lon: ' + lons[j] + '<br>' +
-                                'IC: ' + tc_sources[0][i][j] + 'm';
+                                'IC: ' + value_text;
       };
   };
 
