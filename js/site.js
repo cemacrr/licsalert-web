@@ -121,8 +121,6 @@ function plot_data() {
   var dem = plot_data['dem'];
   var ifgs_inc = plot_data['ifgs_inc'];
   var ifgs_cml = plot_data['ifgs_cml'];
-  var ifgs_lats = plot_data['ifgs_lats'];
-  var ifgs_lons = plot_data['ifgs_lons'];
   var tc_count = plot_data['tc_count'];
   var tc_sources = plot_data['tc_sources'];
   var tc_cml = plot_data['tc_cml'];
@@ -136,116 +134,6 @@ function plot_data() {
   var lats_max = Math.max.apply(Math, lats);
   var lons_min = Math.min.apply(Math, lons);
   var lons_max = Math.max.apply(Math, lons);
-  var ifgs_lats_min = Math.min.apply(Math, ifgs_lats);
-  var ifgs_lats_max = Math.max.apply(Math, ifgs_lats);
-  var ifgs_lons_min = Math.min.apply(Math, ifgs_lons);
-  var ifgs_lons_max = Math.max.apply(Math, ifgs_lons);
-
-
-  /* cumulative ifg plot: */
-
-  var ifg_cml = ifgs_cml[ifgs_cml.length - 1];
-  var ifg_cml_min = Math.min.apply(Math, ifg_cml.flat());
-  var ifg_cml_max = Math.max.apply(Math, ifg_cml.flat());
-
-  var heatmap_ifg_cml_data = [];
-
-  var heatmap_ifg_cml_hovertext = [];
-  for (var i = 0; i < ifgs_lats.length; i++) {
-    heatmap_ifg_cml_hovertext[i] = [];
-    for (var j = 0; j < ifgs_lons.length; j++) {
-      heatmap_ifg_cml_hovertext[i][j] = 'lat: ' + ifgs_lats[i] + '<br>' +
-                                        'lon: ' + ifgs_lons[j] + '<br>' +
-                                        ifg_cml[i][j];
-      };
-  };
-
-  var heatmap_ifg_cml_colorbar = {
-    'tickvals': [ifg_cml_min.toFixed(2), ifg_cml_max.toFixed(2)],
-    'orientation': 'v',
-    'thickness': 15,
-    'len': 0.9
-  };
-
-  var heatmap_ifg_cml = {
-    'type': 'heatmap',
-    'x': ifgs_lons,
-    'y': ifgs_lats,
-    'z': ifg_cml,
-    'zmin': ifg_cml_min,
-    'zmax': ifg_cml_max,
-    'colorscale': ic_colorscale,
-    'colorbar': heatmap_ifg_cml_colorbar,
-    'hoverinfo': 'text',
-    'text': heatmap_ifg_cml_hovertext,
-    'showlegend': false
-  };
-  heatmap_ifg_cml_data.push(heatmap_ifg_cml);
-
-  var heatmap_ifg_cml_xticks = [];
-  var heatmap_ifg_cml_yticks = [];
-  var heatmap_ifg_cml_nticks = 2;
-  var heatmap_ifg_cml_xtick_inc = (ifgs_lons_max - ifgs_lons_min) / (heatmap_ifg_cml_nticks * 2);
-  for (var i = 0; i < heatmap_ifg_cml_nticks; i++) {
-    heatmap_ifg_cml_xticks.push(
-      (ifgs_lons_min + ((i + (i +1)) * heatmap_ifg_cml_xtick_inc)).toFixed(2)
-    );
-  };
-  var heatmap_ifg_cml_ytick_inc = (ifgs_lats_max - ifgs_lats_min) / (heatmap_ifg_cml_nticks * 2);
-  for (var i = 0; i < heatmap_ifg_cml_nticks; i++) {
-    heatmap_ifg_cml_yticks.push(
-      (ifgs_lats_min + ((i + (i +1)) * heatmap_ifg_cml_ytick_inc)).toFixed(2)
-    );
-  };
-
-  var heatmap_ifg_cml_layout = {
-    'title': {
-      'text': ''
-    },
-    'xaxis': {
-      'title': '',
-      'tickmode': 'array',
-      'tickvals': heatmap_ifg_cml_xticks,
-      'range': [ifgs_lons_min, ifgs_lons_max],
-      'autorange': false,
-      'constrain': 'domain',
-      'scaleanchor': 'y',
-      'scaleratio': 1,
-      'zeroline': false,
-      'showline': true,
-      'showgrid': true,
-      'mirror': true
-    },
-    'yaxis': {
-      'title': '',
-      'tickmode': 'array',
-      'tickvals': heatmap_ifg_cml_yticks,
-      'range': [ifgs_lats_min + 0.0001, ifgs_lats_max - 0.0001],
-      'autorange': false,
-      'constrain': 'domain',
-      'zeroline': false,
-      'showline': true,
-      'showgrid': true,
-      'mirror': true
-    },
-    'modebar': {
-      'orientation': 'h',
-    },
-    'margin': {
-      't': 50,
-      'b': 50,
-      'r': 50,
-      'l': 50
-    },
-  };
-
-  var heatmap_ifg_cml_plot = Plotly.newPlot(
-    ifg_cml_plot_div, heatmap_ifg_cml_data, heatmap_ifg_cml_layout, plot_conf
-  );
-
-
-
-
 
 
   /* dem plot: */
@@ -264,6 +152,13 @@ function plot_data() {
 
   var heatmap_dem_colorbar = {
     'tickvals': [dem_min, dem_max],
+    'ticktext': [
+      (dem_min + '        ').substr(0, 8),
+      (dem_max + '        ').substr(0, 8),
+    ],
+    'tickfont': {
+      'size': 10
+    },
     'orientation': 'v',
     'thickness': 15,
     'len': 0.9
@@ -346,6 +241,244 @@ function plot_data() {
   );
 
 
+
+
+
+
+
+
+  /* cumulative ifg plot: */
+
+  var ifg_cml = ifgs_cml[ifgs_cml.length - 1];
+  var ifg_cml_min = Math.min.apply(Math, ifg_cml.flat());
+  var ifg_cml_max = Math.max.apply(Math, ifg_cml.flat());
+
+  var ifg_cml_zmax = Math.max(Math.abs(ifg_cml_min), Math.abs(ifg_cml_max));
+  var ifg_cml_zmin = -1 * ifg_cml_zmax;
+
+  var heatmap_ifg_cml_data = [];
+
+  var heatmap_ifg_cml_hovertext = [];
+  for (var i = 0; i < lats.length; i++) {
+    heatmap_ifg_cml_hovertext[i] = [];
+    for (var j = 0; j < lons.length; j++) {
+      heatmap_ifg_cml_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
+                                        'lon: ' + lons[j] + '<br>' +
+                                        ifg_cml[i][j];
+      };
+  };
+
+  var heatmap_ifg_cml_colorbar = {
+    'tickvals': [ifg_cml_zmin, ifg_cml_zmax],
+    'ticktext': [
+      (ifg_cml_zmin + '        ').substr(0, 8),
+      (ifg_cml_zmax + '        ').substr(0, 8),
+    ],
+    'tickfont': {
+      'size': 10
+    },
+    'orientation': 'v',
+    'thickness': 15,
+    'len': 0.9
+  };
+
+  var heatmap_ifg_cml = {
+    'type': 'heatmap',
+    'x': lons,
+    'y': lats,
+    'z': ifg_cml,
+    'zmin': ifg_cml_zmin,
+    'zmax': ifg_cml_zmax,
+    'colorscale': ic_colorscale,
+    'colorbar': heatmap_ifg_cml_colorbar,
+    'hoverinfo': 'text',
+    'text': heatmap_ifg_cml_hovertext,
+    'showlegend': false
+  };
+  heatmap_ifg_cml_data.push(heatmap_ifg_cml);
+
+  var heatmap_ifg_cml_xticks = [];
+  var heatmap_ifg_cml_yticks = [];
+  var heatmap_ifg_cml_nticks = 2;
+  var heatmap_ifg_cml_xtick_inc = (lons_max - lons_min) / (heatmap_ifg_cml_nticks * 2);
+  for (var i = 0; i < heatmap_ifg_cml_nticks; i++) {
+    heatmap_ifg_cml_xticks.push(
+      (lons_min + ((i + (i +1)) * heatmap_ifg_cml_xtick_inc)).toFixed(2)
+    );
+  };
+  var heatmap_ifg_cml_ytick_inc = (lats_max - lats_min) / (heatmap_ifg_cml_nticks * 2);
+  for (var i = 0; i < heatmap_ifg_cml_nticks; i++) {
+    heatmap_ifg_cml_yticks.push(
+      (lats_min + ((i + (i +1)) * heatmap_ifg_cml_ytick_inc)).toFixed(2)
+    );
+  };
+
+  var heatmap_ifg_cml_layout = {
+    'title': {
+      'text': ''
+    },
+    'xaxis': {
+      'title': '',
+      'tickmode': 'array',
+      'tickvals': heatmap_ifg_cml_xticks,
+      'range': [lons_min, lons_max],
+      'autorange': false,
+      'constrain': 'domain',
+      'scaleanchor': 'y',
+      'scaleratio': 1,
+      'zeroline': false,
+      'showline': true,
+      'showgrid': true,
+      'mirror': true
+    },
+    'yaxis': {
+      'title': '',
+      'tickmode': 'array',
+      'tickvals': heatmap_ifg_cml_yticks,
+      'range': [lats_min + 0.0001, lats_max - 0.0001],
+      'autorange': false,
+      'constrain': 'domain',
+      'zeroline': false,
+      'showline': true,
+      'showgrid': true,
+      'mirror': true
+    },
+    'modebar': {
+      'orientation': 'h',
+    },
+    'margin': {
+      't': 50,
+      'b': 50,
+      'r': 50,
+      'l': 50
+    },
+  };
+
+  var heatmap_ifg_cml_plot = Plotly.newPlot(
+    ifg_cml_plot_div, heatmap_ifg_cml_data, heatmap_ifg_cml_layout, plot_conf
+  );
+
+
+
+
+  /* incremental ifg plot: */
+
+  var ifg_inc = ifgs_inc[ifgs_inc.length - 1];
+  var ifg_inc_min = Math.min.apply(Math, ifg_inc.flat());
+  var ifg_inc_max = Math.max.apply(Math, ifg_inc.flat());
+
+  var ifg_inc_zmax = Math.max(Math.abs(ifg_inc_min), Math.abs(ifg_inc_max));
+  var ifg_inc_zmin = -1 * ifg_inc_zmax;
+
+  var heatmap_ifg_inc_data = [];
+
+  var heatmap_ifg_inc_hovertext = [];
+  for (var i = 0; i < lats.length; i++) {
+    heatmap_ifg_inc_hovertext[i] = [];
+    for (var j = 0; j < lons.length; j++) {
+      heatmap_ifg_inc_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
+                                        'lon: ' + lons[j] + '<br>' +
+                                        ifg_inc[i][j];
+      };
+  };
+
+  var heatmap_ifg_inc_colorbar = {
+    'tickvals': [ifg_inc_zmin, ifg_inc_zmax],
+    'ticktext': [
+      (ifg_inc_zmin + '        ').substr(0, 8),
+      (ifg_inc_zmax + '        ').substr(0, 8),
+    ],
+    'tickfont': {
+      'size': 10
+    },
+    'orientation': 'v',
+    'thickness': 15,
+    'len': 0.9
+  };
+
+  var heatmap_ifg_inc = {
+    'type': 'heatmap',
+    'x': lons,
+    'y': lats,
+    'z': ifg_inc,
+    'zmin': ifg_inc_zmin,
+    'zmax': ifg_inc_zmax,
+    'colorscale': ic_colorscale,
+    'colorbar': heatmap_ifg_inc_colorbar,
+    'hoverinfo': 'text',
+    'text': heatmap_ifg_inc_hovertext,
+    'showlegend': false
+  };
+  heatmap_ifg_inc_data.push(heatmap_ifg_inc);
+
+  var heatmap_ifg_inc_xticks = [];
+  var heatmap_ifg_inc_yticks = [];
+  var heatmap_ifg_inc_nticks = 2;
+  var heatmap_ifg_inc_xtick_inc = (lons_max - lons_min) / (heatmap_ifg_inc_nticks * 2);
+  for (var i = 0; i < heatmap_ifg_inc_nticks; i++) {
+    heatmap_ifg_inc_xticks.push(
+      (lons_min + ((i + (i +1)) * heatmap_ifg_inc_xtick_inc)).toFixed(2)
+    );
+  };
+  var heatmap_ifg_inc_ytick_inc = (lats_max - lats_min) / (heatmap_ifg_inc_nticks * 2);
+  for (var i = 0; i < heatmap_ifg_inc_nticks; i++) {
+    heatmap_ifg_inc_yticks.push(
+      (lats_min + ((i + (i +1)) * heatmap_ifg_inc_ytick_inc)).toFixed(2)
+    );
+  };
+
+  var heatmap_ifg_inc_layout = {
+    'title': {
+      'text': ''
+    },
+    'xaxis': {
+      'title': '',
+      'tickmode': 'array',
+      'tickvals': heatmap_ifg_inc_xticks,
+      'range': [lons_min, lons_max],
+      'autorange': false,
+      'constrain': 'domain',
+      'scaleanchor': 'y',
+      'scaleratio': 1,
+      'zeroline': false,
+      'showline': true,
+      'showgrid': true,
+      'mirror': true
+    },
+    'yaxis': {
+      'title': '',
+      'tickmode': 'array',
+      'tickvals': heatmap_ifg_inc_yticks,
+      'range': [lats_min + 0.0001, lats_max - 0.0001],
+      'autorange': false,
+      'constrain': 'domain',
+      'zeroline': false,
+      'showline': true,
+      'showgrid': true,
+      'mirror': true
+    },
+    'modebar': {
+      'orientation': 'h',
+    },
+    'margin': {
+      't': 50,
+      'b': 50,
+      'r': 50,
+      'l': 50
+    },
+  };
+
+  var heatmap_ifg_inc_plot = Plotly.newPlot(
+    ifg_inc_plot_div, heatmap_ifg_inc_data, heatmap_ifg_inc_layout, plot_conf
+  );
+
+
+
+
+
+
+
+
   /* ic plot: */
 
   var heatmap_data = [];
@@ -362,6 +495,13 @@ function plot_data() {
 
   var heatmap_colorbar = {
     'tickvals': [ic_min, ic_max],
+    'ticktext': [
+      (ic_min + '        ').substr(0, 8),
+      (ic_max + '        ').substr(0, 8),
+    ],
+    'tickfont': {
+      'size': 10
+    },
     'orientation': 'v',
     'thickness': 15,
     'len': 0.9
@@ -511,6 +651,13 @@ function plot_data() {
 
   var scatter_colorbar = {
     'tickvals': [distance_min, distance_max],
+    'ticktext': [
+      (distance_min + '        ').substr(0, 8),
+      (distance_max + '        ').substr(0, 8),
+    ],
+    'tickfont': {
+      'size': 10
+    },
     'orientation': 'v',
     'thickness': 15,
     'len': 0.9
