@@ -8,6 +8,19 @@ var plot_vars = {
   'data_prefix': 'data/',
   /* store plot data here: */
   'plot_data': null,
+  /* plotly plot config: */
+  'plot_conf': {
+    'showLink': false,
+    'linkText': '',
+    'displaylogo': false,
+    'modeBarButtonsToRemove': [
+      'autoScale2d',
+      'lasso2d',
+      'toggleSpikelines',
+      'select2d'
+    ],
+    'responsive': true
+  },
   /* div for dem plotting: */
   'dem_plot_div': document.getElementById('licsalert_dem_plot'),
   /* min and max for dem plotting: */
@@ -72,6 +85,7 @@ async function load_data(data_file) {
 function plot_data() {
 
   /* get required plotting variables: */
+  var plot_conf = plot_vars['plot_conf'];
   var dem_plot_div = plot_vars['dem_plot_div'];
   var dem_min = plot_vars['dem_min'];
   var dem_max = plot_vars['dem_max'];
@@ -186,7 +200,7 @@ function plot_data() {
       'title': '',
       'tickmode': 'array',
       'tickvals': heatmap_dem_yticks,
-      'range': [lats_min, lats_max],
+      'range': [lats_min + 0.0001, lats_max - 0.0001],
       'autorange': false,
       'constrain': 'domain',
       'zeroline': false,
@@ -205,26 +219,9 @@ function plot_data() {
     },
   };
 
-  var heatmap_dem_conf = {
-    'showLink': false,
-    'linkText': '',
-    'displaylogo': false,
-    'modeBarButtonsToRemove': [
-      'autoScale2d',
-      'lasso2d',
-      'toggleSpikelines',
-      'select2d'
-    ],
-    'responsive': true
-  };
-
-
   var heatmap_dem_plot = Plotly.newPlot(
-    dem_plot_div, heatmap_dem_data, heatmap_dem_layout, heatmap_dem_conf
+    dem_plot_div, heatmap_dem_data, heatmap_dem_layout, plot_conf
   );
-
-
-
 
 
   /* ic plot: */
@@ -320,21 +317,8 @@ function plot_data() {
     },
   };
 
-  var heatmap_conf = {
-    'showLink': false,
-    'linkText': '',
-    'displaylogo': false,
-    'modeBarButtonsToRemove': [
-      'autoScale2d',
-      'lasso2d',
-      'toggleSpikelines',
-      'select2d'
-    ],
-    'responsive': true
-  };
-
   var heatmap_plot = Plotly.newPlot(
-    ic_plot_div, heatmap_data, heatmap_layout, heatmap_conf
+    ic_plot_div, heatmap_data, heatmap_layout, plot_conf
   );
 
   /* tc time series plot: */
@@ -473,21 +457,8 @@ function plot_data() {
     'hovermode': 'x'
   };
 
-  var scatter_conf = {
-    'showLink': false,
-    'linkText': '',
-    'displaylogo': false,
-    'modeBarButtonsToRemove': [
-      'autoScale2d',
-      'lasso2d',
-      'toggleSpikelines',
-      'select2d'
-    ],
-    'responsive': true
-  };
-
   var scatter_plot = Plotly.newPlot(
-    ts_plot_div, scatter_data, scatter_layout, scatter_conf
+    ts_plot_div, scatter_data, scatter_layout, plot_conf
   );
 
 };
