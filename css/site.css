@@ -19,13 +19,8 @@ body {
 //  justify-content: space-around;
 }
 
-.licsalert_dem_plot {
-  display: flex;
-  flex: 1 1 auto;
-  max-height: 250px;
-  max-width: 250px;
-}
-
+.licsalert_dem_plot,
+.licsalert_ifg_plot,
 .licsalert_ic_plot {
   display: flex;
   flex: 1 1 auto;

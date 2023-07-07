@@ -32,6 +32,13 @@ var plot_vars = {
     [0.5, 'rgb(217, 216, 98)'],
     [1, 'rgb(96, 17, 5)'],
   ],
+
+  /* div for cumulative ifg plotting: */
+  'ifg_cml_plot_div': document.getElementById('licsalert_ifg_cml_plot'),
+
+  /* div for incremental ifg plotting: */
+  'ifg_inc_plot_div': document.getElementById('licsalert_ifg_inc_plot'),
+
   /* div for ic plotting: */
   'ic_plot_div': document.getElementById('licsalert_ic_plot'),
   /* div for time series plotting: */
@@ -86,6 +93,11 @@ function plot_data() {
 
   /* get required plotting variables: */
   var plot_conf = plot_vars['plot_conf'];
+
+  var ifg_cml_plot_div = plot_vars['ifg_cml_plot_div'];
+
+  var ifg_inc_plot_div = plot_vars['ifg_inc_plot_div'];
+
   var dem_plot_div = plot_vars['dem_plot_div'];
   var dem_min = plot_vars['dem_min'];
   var dem_max = plot_vars['dem_max'];
@@ -107,13 +119,13 @@ function plot_data() {
   var lats = plot_data['lats'];
   var lons = plot_data['lons'];
   var dem = plot_data['dem'];
-  var ifgs_incremental = plot_data['ifgs_incremental'];
-  var ifgs_cumulative = plot_data['ifgs_cumulative'];
+  var ifgs_inc = plot_data['ifgs_inc'];
+  var ifgs_cml = plot_data['ifgs_cml'];
   var ifgs_lats = plot_data['ifgs_lats'];
   var ifgs_lons = plot_data['ifgs_lons'];
   var tc_count = plot_data['tc_count'];
   var tc_sources = plot_data['tc_sources'];
-  var tc_cumulative = plot_data['tc_cumulative'];
+  var tc_cml = plot_data['tc_cml'];
   var tc_distances = plot_data['tc_distances'];
   var tc_lines = plot_data['tc_lines'];
   var residuals = plot_data['residuals'];
@@ -124,6 +136,116 @@ function plot_data() {
   var lats_max = Math.max.apply(Math, lats);
   var lons_min = Math.min.apply(Math, lons);
   var lons_max = Math.max.apply(Math, lons);
+  var ifgs_lats_min = Math.min.apply(Math, ifgs_lats);
+  var ifgs_lats_max = Math.max.apply(Math, ifgs_lats);
+  var ifgs_lons_min = Math.min.apply(Math, ifgs_lons);
+  var ifgs_lons_max = Math.max.apply(Math, ifgs_lons);
+
+
+  /* cumulative ifg plot: */
+
+  var ifg_cml = ifgs_cml[ifgs_cml.length - 1];
+  var ifg_cml_min = Math.min.apply(Math, ifg_cml.flat());
+  var ifg_cml_max = Math.max.apply(Math, ifg_cml.flat());
+
+  var heatmap_ifg_cml_data = [];
+
+  var heatmap_ifg_cml_hovertext = [];
+  for (var i = 0; i < ifgs_lats.length; i++) {
+    heatmap_ifg_cml_hovertext[i] = [];
+    for (var j = 0; j < ifgs_lons.length; j++) {
+      heatmap_ifg_cml_hovertext[i][j] = 'lat: ' + ifgs_lats[i] + '<br>' +
+                                        'lon: ' + ifgs_lons[j] + '<br>' +
+                                        ifg_cml[i][j];
+      };
+  };
+
+  var heatmap_ifg_cml_colorbar = {
+    'tickvals': [ifg_cml_min.toFixed(2), ifg_cml_max.toFixed(2)],
+    'orientation': 'v',
+    'thickness': 15,
+    'len': 0.9
+  };
+
+  var heatmap_ifg_cml = {
+    'type': 'heatmap',
+    'x': ifgs_lons,
+    'y': ifgs_lats,
+    'z': ifg_cml,
+    'zmin': ifg_cml_min,
+    'zmax': ifg_cml_max,
+    'colorscale': ic_colorscale,
+    'colorbar': heatmap_ifg_cml_colorbar,
+    'hoverinfo': 'text',
+    'text': heatmap_ifg_cml_hovertext,
+    'showlegend': false
+  };
+  heatmap_ifg_cml_data.push(heatmap_ifg_cml);
+
+  var heatmap_ifg_cml_xticks = [];
+  var heatmap_ifg_cml_yticks = [];
+  var heatmap_ifg_cml_nticks = 2;
+  var heatmap_ifg_cml_xtick_inc = (ifgs_lons_max - ifgs_lons_min) / (heatmap_ifg_cml_nticks * 2);
+  for (var i = 0; i < heatmap_ifg_cml_nticks; i++) {
+    heatmap_ifg_cml_xticks.push(
+      (ifgs_lons_min + ((i + (i +1)) * heatmap_ifg_cml_xtick_inc)).toFixed(2)
+    );
+  };
+  var heatmap_ifg_cml_ytick_inc = (ifgs_lats_max - ifgs_lats_min) / (heatmap_ifg_cml_nticks * 2);
+  for (var i = 0; i < heatmap_ifg_cml_nticks; i++) {
+    heatmap_ifg_cml_yticks.push(
+      (ifgs_lats_min + ((i + (i +1)) * heatmap_ifg_cml_ytick_inc)).toFixed(2)
+    );
+  };
+
+  var heatmap_ifg_cml_layout = {
+    'title': {
+      'text': ''
+    },
+    'xaxis': {
+      'title': '',
+      'tickmode': 'array',
+      'tickvals': heatmap_ifg_cml_xticks,
+      'range': [ifgs_lons_min, ifgs_lons_max],
+      'autorange': false,
+      'constrain': 'domain',
+      'scaleanchor': 'y',
+      'scaleratio': 1,
+      'zeroline': false,
+      'showline': true,
+      'showgrid': true,
+      'mirror': true
+    },
+    'yaxis': {
+      'title': '',
+      'tickmode': 'array',
+      'tickvals': heatmap_ifg_cml_yticks,
+      'range': [ifgs_lats_min + 0.0001, ifgs_lats_max - 0.0001],
+      'autorange': false,
+      'constrain': 'domain',
+      'zeroline': false,
+      'showline': true,
+      'showgrid': true,
+      'mirror': true
+    },
+    'modebar': {
+      'orientation': 'h',
+    },
+    'margin': {
+      't': 50,
+      'b': 50,
+      'r': 50,
+      'l': 50
+    },
+  };
+
+  var heatmap_ifg_cml_plot = Plotly.newPlot(
+    ifg_cml_plot_div, heatmap_ifg_cml_data, heatmap_ifg_cml_layout, plot_conf
+  );
+
+
+
+
 
 
   /* dem plot: */
@@ -131,11 +253,11 @@ function plot_data() {
   var heatmap_dem_data = [];
 
   var heatmap_dem_hovertext = [];
-  for (var i = 0; i < lons.length; i++) {
+  for (var i = 0; i < lats.length; i++) {
     heatmap_dem_hovertext[i] = [];
-    for (var j = 0; j < lats.length; j++) {
-      heatmap_dem_hovertext[i][j] = 'lon: ' + lons[i] + '<br>' +
-                                    'lat: ' + lats[i] + '<br>' +
+    for (var j = 0; j < lons.length; j++) {
+      heatmap_dem_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
+                                    'lon: ' + lons[j] + '<br>' +
                                     'elevation: ' + dem[i][j] + 'm';
       };
   };
@@ -229,11 +351,11 @@ function plot_data() {
   var heatmap_data = [];
 
   var heatmap_hovertext = [];
-  for (var i = 0; i < lons.length; i++) {
+  for (var i = 0; i < lats.length; i++) {
     heatmap_hovertext[i] = [];
-    for (var j = 0; j < lats.length; j++) {
-      heatmap_hovertext[i][j] = 'lon: ' + lons[i] + '<br>' +
-                                'lat: ' + lats[i] + '<br>' +
+    for (var j = 0; j < lons.length; j++) {
+      heatmap_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
+                                'lon: ' + lons[j] + '<br>' +
                                 'IC: ' + tc_sources[0][i][j] + 'm';
       };
   };
@@ -395,9 +517,9 @@ function plot_data() {
   };
 
   var scatter_hovertext = [];
-  for (var i = 0; i < tc_cumulative[0].length; i++) {
+  for (var i = 0; i < tc_cml[0].length; i++) {
     scatter_hovertext.push(
-      dates[i] + ': ' + tc_cumulative[0][i]
+      dates[i] + ': ' + tc_cml[0][i]
     );
   };
 
@@ -405,7 +527,7 @@ function plot_data() {
     'type': 'scatter',
     'name': '',
     'x': dates,
-    'y': tc_cumulative[0],
+    'y': tc_cml[0],
     'yaxis': 'y1',
     'mode': 'markers',
     'marker': {
