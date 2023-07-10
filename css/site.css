@@ -8,11 +8,17 @@ body {
 
 /** content: **/
 
+.plot_section {
+  margin: 0;
+  padding: 0;
+}
+
 .plot_container {
   background-color: #ffffff;
   width: 98%;
   margin: auto;
-  margin-top: 2em;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
   display: flex;
   flex: 1 1 auto;
   flex-flow: row wrap;
@@ -21,7 +27,9 @@ body {
 .heatmap_plot {
   display: flex;
   flex: 1 1 auto;
+  min-height: 300px;
   max-height: 300px;
+  min-width: 300px;
   max-width: 300px;
 }
 

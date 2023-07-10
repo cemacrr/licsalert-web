@@ -31,13 +31,6 @@ var plot_vars = {
   ],
   /* div for ic plotting: */
   'ic_div': document.getElementById('ic_plots'),
-
-
-
-  /* div for ic plotting: */
-  'heatmap_ic_div': document.getElementById('heatmap_ic'),
-  /* div for time series plotting: */
-  'ts_ic_div': document.getElementById('ts_ic'),
   /* min and max for ic plotting: */
   'ic_min': -0.5,
   'ic_max': 0.5,
@@ -54,6 +47,8 @@ var plot_vars = {
   ],
   /* color for baseline plotting: */
   'baseline_color': '#9999ff',
+  /* div for residuals plotting: */
+  'residuals_div': document.getElementById('residuals_plots'),
   /* plotly plot config: */
   'plot_conf': {
     'showLink': false,
@@ -91,7 +86,6 @@ async function load_data(data_file) {
 
 /* heatmap plotting function: */
 function plot_heatmap(plot_options) {
-
   /* get plot options: */
   var div = plot_options['div'];
   var title = plot_options['title'];
@@ -225,9 +219,184 @@ function plot_heatmap(plot_options) {
   );
 };
 
+/* time series plotting function: */
+function plot_ts(plot_options) {
+  /* get plot options: */
+  var div = plot_options['div'];
+  var title = plot_options['title'];
+  var baseline_end = plot_options['baseline_end'];
+  var baseline_color = plot_options['baseline_color'];
+  var distances = plot_options['distances'];
+  var distance_min = plot_options['distance_min'];
+  var distance_max = plot_options['distance_max'];
+  var distance_colorscale = plot_options['distance_colorscale'];
+  var dates = plot_options['dates'];
+  var lines = plot_options['lines'];
+  var cml = plot_options['cml'];
+  var conf = plot_options['conf'];
+
+  /* init array for plot data: */
+  var data = [];
+
+  /* create the baseline end date scatter plot: */
+  var scatter_baseline = {
+    'type': 'scatter',
+    'name': '',
+    'x': [baseline_end, baseline_end],
+    'y': [distance_min, distance_max * 2],
+    'yaxis': 'y2',
+    'mode': 'lines',
+    'line': {
+      'color': baseline_color
+    },
+    'opacity': 0.8,
+    'hoverinfo': 'text',
+    'text': 'baseline end: ' + baseline_end,
+    'showlegend': false
+  };
+  data.push(scatter_baseline);
+
+  /* create the hovertext for the bar plot: */
+  var bar_hovertext = [];
+  for (var i = 0; i < distances.length; i++) {
+    bar_hovertext.push(
+      dates[i] + ': ' + distances[i] + 'σ'
+    );
+  };
+
+  /* create the bar plot: */
+  var scatter_bar = {
+    'type': 'bar',
+    'name': '',
+    'x': dates,
+    'y': distances,
+    'yaxis': 'y2',
+    'marker': {
+      'color': distances,
+      'colorscale': distance_colorscale,
+      'cmin': distance_min,
+      'cmax': distance_max
+    },
+    'opacity': 0.4,
+    'textposition': 'none',
+    'hoverinfo': 'text',
+    'text': bar_hovertext,
+    'showlegend': false
+  };
+  data.push(scatter_bar);
+
+  /* create plots for the lines of best fit: */
+  for (var i = 0; i < lines.length; i++) {
+    var scatter_line = {
+      'type': 'scatter',
+      'name': '',
+      'x': dates,
+      'y': lines[i],
+      'yaxis': 'y1',
+      'mode': 'lines',
+      'marker': {
+        'color': '#999999',
+      },
+      'hoverinfo': 'none',
+      'showlegend': false
+    };
+    data.push(scatter_line);
+  };
+
+  /* create colorbar for scatter plot: */
+  var scatter_colorbar = {
+    'tickvals': [distance_min, distance_max],
+    'ticktext': [
+      (distance_min + '        ').substr(0, 8),
+      (distance_max + '        ').substr(0, 8),
+    ],
+    'tickfont': {
+      'size': 10
+    },
+    'x': 1.005,
+    'orientation': 'v',
+    'thickness': 15,
+    'len': 1.05
+  };
+
+  /* create scatter hovertext: */
+  var scatter_hovertext = [];
+  for (var i = 0; i < cml.length; i++) {
+    scatter_hovertext.push(
+      dates[i] + ': ' + cml[i]
+    );
+  };
+
+  /* create the scatter plot: */
+  var scatter = {
+    'type': 'scatter',
+    'name': '',
+    'x': dates,
+    'y': cml,
+    'yaxis': 'y1',
+    'mode': 'markers',
+    'marker': {
+      'color': distances,
+      'colorscale': distance_colorscale,
+      'cmin': distance_min,
+      'cmax': distance_max,
+      'colorbar': scatter_colorbar
+    },
+    'hoverinfo': 'text',
+    'text': scatter_hovertext,
+    'showlegend': false
+  };
+  data.push(scatter);
+
+  /* create the plot layout: */
+  var layout = {
+    'title': {
+      'text': title,
+      'x': 0.05,
+      'y': 0.85
+    },
+    'xaxis': {
+      'title': '',
+      'zeroline': false,
+      'showline': true,
+      'showgrid': true,
+      'ticks': 'outside',
+      'mirror': true
+    },
+    'yaxis': {
+      'title': '',
+      'zeroline': false,
+      'showline': true,
+      'showgrid': false,
+      'ticks': 'outside',
+      'mirror': true,
+      'side': 'left'
+    },
+    'yaxis2': {
+      'title': '',
+      'overlaying': 'y',
+      'range': [distance_min, distance_max * 2],
+      'zeroline': false,
+      'side': 'right',
+      'visible': false
+    },
+    'margin': {
+      't': 65,
+      'b': 65,
+      'r': 50,
+      'l': 50
+    },
+    'hovermode': 'x'
+  };
+
+  /* draw the plot: */
+  var plot = Plotly.newPlot(
+    div, data, layout, conf
+  );
+};
+
 /* data plotting function: */
 function plot_data() {
-
   /* get required plotting variables: */
   var heatmap_dem_div = plot_vars['heatmap_dem_div'];
   var dem_min = plot_vars['dem_min'];
@@ -236,16 +405,14 @@ function plot_data() {
   var heatmap_ifg_cml_div = plot_vars['heatmap_ifg_cml_div'];
   var heatmap_ifg_inc_div = plot_vars['heatmap_ifg_inc_div'];
   var ifg_colorscale = plot_vars['ifg_colorscale'];
-  var heatmap_ic_div = plot_vars['heatmap_ic_div'];
   var ic_div = plot_vars['ic_div'];
-
-  var ts_ic_div = plot_vars['ts_ic_div'];
   var ic_min = plot_vars['ic_min'];
   var ic_max = plot_vars['ic_max'];
   var distance_min = plot_vars['distance_min'];
   var distance_max = plot_vars['distance_max'];
   var distance_colorscale = plot_vars['distance_colorscale'];
   var baseline_color = plot_vars['baseline_color'];
+  var residuals_div = plot_vars['residuals_div'];
   var plot_conf = plot_vars['plot_conf'];
 
   /* get required data variables: */
@@ -264,6 +431,7 @@ function plot_data() {
   var tc_distances = plot_data['tc_distances'];
   var tc_lines = plot_data['tc_lines'];
   var residuals = plot_data['residuals'];
+  var residuals_distances = plot_data['residuals_distances'];
   var residuals_lines = plot_data['residuals_lines'];
 
   /* calculate some possibly useful values: */
@@ -414,6 +582,9 @@ function plot_data() {
   for (var tc_id = 0; tc_id < tc_count; tc_id++) {
     /* get the data for this ic: */
     var ic = tc_sources[tc_id];
+    var distances = tc_distances[tc_id];
+    var lines = tc_lines[tc_id];
+    var cml = tc_cml[tc_id];
 
     /* create div for ic plots: */
     var ic_plot_container = document.createElement("div");
@@ -422,14 +593,14 @@ function plot_data() {
     ic_div.appendChild(ic_plot_container);
     /* create div for heatmap plot: */
     var heatmap_ic_div = document.createElement("div");
-    var heatmap_ic_id = 'heatmap_ic_' + tc_id
+    var heatmap_ic_id = 'heatmap_ic_' + tc_id;
     heatmap_ic_div.id = heatmap_ic_id;
     heatmap_ic_div.classList = 'heatmap_plot';
     ic_plot_container.appendChild(heatmap_ic_div);
     /* create div for ts plot: */
     var ts_ic_div = document.createElement("div");
-    var ts_ic_div_id = 'ts_ic_' + tc_id;
-    ts_ic_div.id = ts_ic_div_id;
+    var ts_ic_id = 'ts_ic_' + tc_id;
+    ts_ic_div.id = ts_ic_id;
     ts_ic_div.classList = 'ts_plot';
     ic_plot_container.appendChild(ts_ic_div);
 
@@ -463,207 +634,62 @@ function plot_data() {
     /* plot the heatmap: */
     plot_heatmap(heatmap_ic_options);
  
-
-
+    /* plot options for ic time series: */
+    var ts_ic_options = {
+      'div': ts_ic_id,
+      'title': '',
+      'baseline_end': baseline_end,
+      'baseline_color': baseline_color,
+      'distances': distances,
+      'distance_min': distance_min,
+      'distance_max': distance_max,
+      'distance_colorscale': distance_colorscale,
+      'dates': dates,
+      'lines': lines,
+      'cml': cml,
+      'conf': plot_conf
+    };
+    /* plot the time series: */
+    plot_ts(ts_ic_options);
   };
 
-  /* --- ic heatmap plot: --- */
+  /* --- residuals plotting: --- */
 
+  /* create div for ic plots: */
+  var residuals_plot_container = document.createElement("div");
+  residuals_plot_container.id = 'residuals_plot_container';
+  residuals_plot_container.classList = 'plot_container';
+  residuals_div.appendChild(residuals_plot_container);
+  /* create div for heatmap plot: */
+  var heatmap_residuals_div = document.createElement("div");
+  var heatmap_residuals_id = 'heatmap_residuals';
+  heatmap_residuals_div.id = heatmap_residuals_id;
+  heatmap_residuals_div.classList = 'heatmap_plot';
+  residuals_plot_container.appendChild(heatmap_residuals_div);
+  /* create div for ts plot: */
+  var ts_residuals_div = document.createElement("div");
+  var ts_residuals_id = 'ts_residuals_' + tc_id;
+  ts_residuals_div.id = ts_residuals_id;
+  ts_residuals_div.classList = 'ts_plot';
+  residuals_plot_container.appendChild(ts_residuals_div);
 
-
-
-  /* get the ic data: */
-  var ic = tc_sources[0];
-  /* create hovertext: */
-  var heatmap_ic_hovertext = [];
-  for (var i = 0; i < lats.length; i++) {
-    heatmap_ic_hovertext[i] = [];
-    for (var j = 0; j < lons.length; j++) {
-      if (ic[i][j] == null) {
-        var value_text = 'null';
-      } else {
-        var value_text = ic[i][j] + 'm';
-      };
-      heatmap_ic_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
-                                   'lon: ' + lons[j] + '<br>' +
-                                   'IC: ' + value_text;
-      };
-  };
-
-  /* plot options for ic heatmap: */
-  var heatmap_ic_options = {
-    'div': heatmap_ic_div,
-    'title': 'IC0',
-    'x': lons,
-    'x_min': lons_min,
-    'x_max': lons_max,
-    'y': lats,
-    'y_min': lats_min,
-    'y_max': lats_max,
-    'z': ic,
-    'z_min': ic_min,
-    'z_max': ic_max,
-    'x_ticks': heatmap_x_ticks,
-    'y_ticks': heatmap_y_ticks,
-    'hovertext': heatmap_ic_hovertext,
-    'colorscale': ifg_colorscale,
+  /* plot options for ic time series: */
+  var ts_residuals_options = {
+    'div': ts_residuals_id,
+    'title': 'RMS residual',
+    'baseline_end': baseline_end,
+    'baseline_color': baseline_color,
+    'distances': residuals_distances,
+    'distance_min': distance_min,
+    'distance_max': distance_max,
+    'distance_colorscale': distance_colorscale,
+    'dates': dates,
+    'lines': residuals_lines,
+    'cml': residuals,
     'conf': plot_conf
   };
-  /* plot the heatmap: */
-  plot_heatmap(heatmap_ic_options);
-
-
-  /* --- ic time series plot: --- */
-
-
-  var scatter_data = [];
-
-  var scatter_baseline = {
-    'type': 'scatter',
-    'name': '',
-    'x': [baseline_end, baseline_end],
-    'y': [distance_min, distance_max],
-    'yaxis': 'y2',
-    'mode': 'lines',
-    'line': {
-      'color': baseline_color
-    },
-    'opacity': 0.8,
-    'hoverinfo': 'text',
-    'text': 'baseline end: ' + baseline_end,
-    'showlegend': false
-  };
-  scatter_data.push(scatter_baseline);
-
-  var bar_hovertext = [];
-  for (var i = 0; i < tc_distances[0].length; i++) {
-    bar_hovertext.push(
-      dates[i] + ': ' + tc_distances[0][i] + 'σ'
-    );
-  };
-
-  var scatter_bar = {
-    'type': 'bar',
-    'name': '',
-    'x': dates,
-    'y': tc_distances[0],
-    'yaxis': 'y2',
-    'marker': {
-      'color': tc_distances[0],
-      'colorscale': distance_colorscale,
-      'cmin': distance_min,
-      'cmax': distance_max
-    },
-    'opacity': 0.4,
-    'textposition': 'none',
-    'hoverinfo': 'text',
-    'text': bar_hovertext,
-    'showlegend': false
-  };
-  scatter_data.push(scatter_bar);
-
-  var scatter_lines = tc_lines[0];
-  for (var i = 0; i < scatter_lines.length; i++) {
-    var scatter_line = {
-      'type': 'scatter',
-      'name': '',
-      'x': dates,
-      'y': scatter_lines[i],
-      'yaxis': 'y1',
-      'mode': 'lines',
-      'marker': {
-        'color': '#999999',
-      },
-      'hoverinfo': 'none',
-      'showlegend': false
-    };
-    scatter_data.push(scatter_line);
-  };
-
-  var scatter_colorbar = {
-    'tickvals': [distance_min, distance_max],
-    'ticktext': [
-      (distance_min + '        ').substr(0, 8),
-      (distance_max + '        ').substr(0, 8),
-    ],
-    'tickfont': {
-      'size': 10
-    },
-    'x': 1.005,
-    'orientation': 'v',
-    'thickness': 15,
-    'len': 1.05
-  };
-
-  var scatter_hovertext = [];
-  for (var i = 0; i < tc_cml[0].length; i++) {
-    scatter_hovertext.push(
-      dates[i] + ': ' + tc_cml[0][i]
-    );
-  };
-
-  var scatter = {
-    'type': 'scatter',
-    'name': '',
-    'x': dates,
-    'y': tc_cml[0],
-    'yaxis': 'y1',
-    'mode': 'markers',
-    'marker': {
-      'color': tc_distances[0],
-      'colorscale': distance_colorscale,
-      'cmin': distance_min,
-      'cmax': distance_max,
-      'colorbar': scatter_colorbar
-    },
-    'hoverinfo': 'text',
-    'text': scatter_hovertext,
-    'showlegend': false
-  };
-  scatter_data.push(scatter);
-
-  var scatter_layout = {
-    'title': {
-      'text': ''
-    },
-    'xaxis': {
-      'title': '',
-      'zeroline': false,
-      'showline': true,
-      'showgrid': true,
-      'ticks': 'outside',
-      'mirror': true
-    },
-    'yaxis': {
-      'title': '',
-      'zeroline': false,
-      'showline': true,
-      'showgrid': false,
-      'ticks': 'outside',
-      'mirror': true,
-      'side': 'left'
-    },
-    'yaxis2': {
-      'title': '',
-      'overlaying': 'y',
-      'range': [distance_min, distance_max],
-      'zeroline': false,
-      'side': 'right',
-      'visible': false
-    },
-    'margin': {
-      't': 65,
-      'b': 65,
-      'r': 50,
-      'l': 50
-    },
-    'hovermode': 'x'
-  };
-
-  var scatter_plot = Plotly.newPlot(
-    ts_ic_div, scatter_data, scatter_layout, plot_conf
-  );
-
+  /* plot the time series: */
+  plot_ts(ts_residuals_options);
 };
 
 /* page loading / set up function: */
