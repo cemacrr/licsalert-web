@@ -15,7 +15,7 @@ body {
 
 .plot_container {
   background-color: #ffffff;
-  width: 98%;
+  width: calc(100% - 0.5em);
   margin: auto;
   margin-top: 0.25em;
   margin-bottom: 0.25em;

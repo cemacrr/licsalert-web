@@ -111,6 +111,7 @@ function plot_heatmap(plot_options) {
   var z_units = plot_options['z_units'];
   var z_dp = plot_options['z_dp'];
   var colorscale = plot_options['colorscale'];
+  var colorbar_title = plot_options['colorbar_title'];
   var conf = plot_options['conf'];
 
   /* init array for plot data: */
@@ -118,6 +119,10 @@ function plot_heatmap(plot_options) {
 
   /* create the colorbar: */
   var colorbar = {
+    'title': {
+      'text': colorbar_title,
+      'side': 'right'
+    },
     'tickvals': [z_min, z_max],
     'ticktext': [
       (z_min + '        ').substr(0, 8),
@@ -238,6 +243,16 @@ function plot_ts(plot_options) {
   /* init array for plot data: */
   var data = [];
 
+  /* create hovertext: */
+  var hovertext = [];
+  for (var i = 0; i < cml.length; i++) {
+      hovertext.push(
+      dates[i] + '<br>' +
+      cml[i] + '<br>' +
+      distances[i] + 'σ'
+    );
+  };
+
   /* create the baseline end date scatter plot: */
   var scatter_baseline = {
     'type': 'scatter',
@@ -256,14 +271,6 @@ function plot_ts(plot_options) {
   };
   data.push(scatter_baseline);
 
-  /* create the hovertext for the bar plot: */
-  var bar_hovertext = [];
-  for (var i = 0; i < distances.length; i++) {
-    bar_hovertext.push(
-      dates[i] + ': ' + distances[i] + 'σ'
-    );
-  };
-
   /* create the bar plot: */
   var scatter_bar = {
     'type': 'bar',
@@ -279,8 +286,7 @@ function plot_ts(plot_options) {
     },
     'opacity': 0.4,
     'textposition': 'none',
-    'hoverinfo': 'text',
-    'text': bar_hovertext,
+    'hoverinfo': 'none',
     'showlegend': false
   };
   data.push(scatter_bar);
@@ -305,6 +311,10 @@ function plot_ts(plot_options) {
 
   /* create colorbar for scatter plot: */
   var scatter_colorbar = {
+    'title': {
+      'text': 'σ from trend line',
+      'side': 'right'
+    },
     'tickvals': [distance_min, distance_max],
     'ticktext': [
       (distance_min + '        ').substr(0, 8),
@@ -317,14 +327,6 @@ function plot_ts(plot_options) {
     'orientation': 'v',
     'thickness': 15,
     'len': 1.05
-  };
-
-  /* create scatter hovertext: */
-  var scatter_hovertext = [];
-  for (var i = 0; i < cml.length; i++) {
-    scatter_hovertext.push(
-      dates[i] + ': ' + cml[i]
-    );
   };
 
   /* create the scatter plot: */
@@ -343,7 +345,7 @@ function plot_ts(plot_options) {
       'colorbar': scatter_colorbar
     },
     'hoverinfo': 'text',
-    'text': scatter_hovertext,
+    'text': hovertext,
     'showlegend': false
   };
   data.push(scatter);
@@ -489,6 +491,7 @@ function plot_data() {
     'z_units': 'm',
     'z_dp': 1,
     'colorscale': dem_colorscale,
+    'colorbar_title': 'elevation (m)',
     'conf': plot_conf
   };
   /* plot the heatmap: */
@@ -527,9 +530,10 @@ function plot_data() {
     'z_min': ifg_cml_z_min,
     'z_max': ifg_cml_z_max,
     'z_label': null,
-    'z_units': null,
+    'z_units': 'm',
     'z_dp': 4,
     'colorscale': ifg_colorscale,
+    'colorbar_title': null,
     'conf': plot_conf
   };
   /* plot the heatmap: */
@@ -568,9 +572,10 @@ function plot_data() {
     'z_min': ifg_inc_z_min,
     'z_max': ifg_inc_z_max,
     'z_label': null,
-    'z_units': null,
+    'z_units': 'm',
     'z_dp': 4,
     'colorscale': ifg_colorscale,
+    'colorbar_title': null,
     'conf': plot_conf
   };
   /* plot the heatmap: */
@@ -629,6 +634,7 @@ function plot_data() {
       'z_units': 'm',
       'z_dp': 4,
       'colorscale': ifg_colorscale,
+      'colorbar_title': 'IC (m)',
       'conf': plot_conf
     };
     /* plot the heatmap: */
