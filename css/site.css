@@ -8,7 +8,7 @@ body {
 
 /** content: **/
 
-.licsalert_plot_container {
+.plot_container {
   background-color: #ffffff;
   width: 98%;
   margin: auto;
@@ -16,19 +16,16 @@ body {
   display: flex;
   flex: 1 1 auto;
   flex-flow: row wrap;
-//  justify-content: space-around;
 }
 
-.licsalert_dem_plot,
-.licsalert_ifg_plot,
-.licsalert_ic_plot {
+.heatmap_plot {
   display: flex;
   flex: 1 1 auto;
   max-height: 300px;
   max-width: 300px;
 }
 
-.licsalert_ts_plot {
+.ts_plot {
   display: flex;
   flex: 1 1 auto;
   max-height: 300px;
