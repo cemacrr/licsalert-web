@@ -8,20 +8,6 @@ var plot_vars = {
   'data_prefix': 'data/',
   /* store plot data here: */
   'plot_data': null,
-  /* plotly plot config: */
-  'plot_conf': {
-    'showLink': false,
-    'linkText': '',
-    'displaylogo': false,
-    'modeBarButtonsToRemove': [
-      'autoScale2d',
-      'lasso2d',
-      'toggleSpikelines',
-      'select2d'
-    ],
-    'responsive': true
-  },
-
   /* div for dem plotting: */
   'heatmap_dem_div': document.getElementById('heatmap_dem'),
   /* min and max for dem plotting: */
@@ -33,23 +19,16 @@ var plot_vars = {
     [0.5, 'rgb(217, 216, 98)'],
     [1, 'rgb(96, 17, 5)'],
   ],
-
   /* div for cumulative ifg plotting: */
   'heatmap_ifg_cml_div': document.getElementById('heatmap_ifg_cml'),
-
   /* div for incremental ifg plotting: */
   'heatmap_ifg_inc_div': document.getElementById('heatmap_ifg_inc'),
-
   /* colorscale for ifg plotting: */
   'ifg_colorscale': [
     [0, 'rgb(0, 0, 254)'],
     [0.5, 'rgb(255, 255 255)'],
     [1, 'rgb(254, 0, 0)']
   ],
-
-
-
-
   /* div for ic plotting: */
   'heatmap_ic_div': document.getElementById('heatmap_ic'),
   /* div for time series plotting: */
@@ -69,7 +48,20 @@ var plot_vars = {
     [1, 'rgb(254, 0, 0)'],
   ],
   /* color for baseline plotting: */
-  'baseline_color': '#9999ff'
+  'baseline_color': '#9999ff',
+  /* plotly plot config: */
+  'plot_conf': {
+    'showLink': false,
+    'linkText': '',
+    'displaylogo': false,
+    'modeBarButtonsToRemove': [
+      'autoScale2d',
+      'lasso2d',
+      'toggleSpikelines',
+      'select2d'
+    ],
+    'responsive': true
+  }
 };
 
 /** functions: **/
@@ -92,7 +84,6 @@ async function load_data(data_file) {
   };
 };
 
-
 /* heatmap plotting function: */
 function plot_heatmap(plot_options) {
   /* get plot options: */
@@ -112,10 +103,9 @@ function plot_heatmap(plot_options) {
   var y_ticks = plot_options['y_ticks'];
   var colorscale = plot_options['colorscale'];
   var conf = plot_options['conf'];
-
-
+  /* init array for plot data: */
   var heatmap_data = [];
-
+  /* create the colorbar: */
   var heatmap_colorbar = {
     'tickvals': [z_min, z_max],
     'ticktext': [
@@ -129,7 +119,7 @@ function plot_heatmap(plot_options) {
     'thickness': 15,
     'len': 0.9
   };
-
+  /* create the heatmap plot: */
   var heatmap = {
     'type': 'heatmap',
     'x': x,
@@ -144,7 +134,7 @@ function plot_heatmap(plot_options) {
     'showlegend': false
   };
   heatmap_data.push(heatmap);
-
+  /* create the heatmap layout: */
   var heatmap_layout = {
     'title': {
       'text': title,
@@ -187,14 +177,11 @@ function plot_heatmap(plot_options) {
       'l': 50
     },
   };
-
+  /* draw the plot: */
   var heatmap_plot = Plotly.newPlot(
     div, heatmap_data, heatmap_layout, conf
   );
-
 };
-
-
 
 /* data plotting function: */
 function plot_data() {
@@ -207,14 +194,7 @@ function plot_data() {
   var heatmap_ifg_cml_div = plot_vars['heatmap_ifg_cml_div'];
   var heatmap_ifg_inc_div = plot_vars['heatmap_ifg_inc_div'];
   var ifg_colorscale = plot_vars['ifg_colorscale'];
-
-
-  var plot_conf = plot_vars['plot_conf'];
-
-
-
-
-  var heatmap_ic_div = plot_vars['ic_plot_div'];
+  var heatmap_ic_div = plot_vars['heatmap_ic_div'];
   var ts_ic_div = plot_vars['ts_ic_div'];
   var ic_min = plot_vars['ic_min'];
   var ic_max = plot_vars['ic_max'];
@@ -222,6 +202,7 @@ function plot_data() {
   var distance_max = plot_vars['distance_max'];
   var distance_colorscale = plot_vars['distance_colorscale'];
   var baseline_color = plot_vars['baseline_color'];
+  var plot_conf = plot_vars['plot_conf'];
 
   /* get required data variables: */
   var plot_data = plot_vars['plot_data'];
@@ -269,9 +250,23 @@ function plot_data() {
     );
   };
 
+  /* --- dem plot: --- */
 
-
-  /* dem plot: */
+  /* create hovertext: */
+  var heatmap_dem_hovertext = [];
+  for (var i = 0; i < lats.length; i++) {
+    heatmap_dem_hovertext[i] = [];
+    for (var j = 0; j < lons.length; j++) {
+      if (dem[i][j] == 'null') {
+        var value_text = 'null';
+      } else {
+        var value_text = dem[i][j].toFixed(1) + 'm';
+      };
+      heatmap_dem_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
+                                    'lon: ' + lons[j] + '<br>' +
+                                    'elevation: ' + value_text;
+      };
+  };
 
   /* plot options for dem heatmap: */
   var heatmap_dem_options = {
@@ -288,20 +283,38 @@ function plot_data() {
     'z_max': dem_max,
     'x_ticks': heatmap_x_ticks,
     'y_ticks': heatmap_y_ticks,
+    'hovertext': heatmap_dem_hovertext,
     'colorscale': dem_colorscale,
     'conf': plot_conf
   };
   /* plot the heatmap: */
   plot_heatmap(heatmap_dem_options);
 
-  /* cumulative ifg plot: */
+  /* --- cumulative ifg plot: --- */
 
+  /* get cumulative data: */
   var ifg_cml = ifgs_cml[ifgs_cml.length - 1];
+  /* get min and max values: */
   var ifg_cml_min = Math.min.apply(Math, ifg_cml.flat());
   var ifg_cml_max = Math.max.apply(Math, ifg_cml.flat());
-
+  /* calculate min and max values for plotting: */
   var ifg_cml_z_max = Math.max(Math.abs(ifg_cml_min), Math.abs(ifg_cml_max));
   var ifg_cml_z_min = -1 * ifg_cml_z_max;
+  /* create hovertext: */
+  var heatmap_ifg_cml_hovertext = [];
+  for (var i = 0; i < lats.length; i++) {
+    heatmap_ifg_cml_hovertext[i] = [];
+    for (var j = 0; j < lons.length; j++) {
+      if (dem[i][j] == 'null') {
+        var value_text = 'null';
+      } else {
+        var value_text = dem[i][j].toFixed(4);
+      };
+      heatmap_ifg_cml_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
+                                        'lon: ' + lons[j] + '<br>' +
+                                        value_text;
+      };
+  };
 
   /* plot options for cumulative ifg heatmap: */
   var heatmap_ifg_cml_options = {
@@ -318,20 +331,38 @@ function plot_data() {
     'z_max': ifg_cml_z_max,
     'x_ticks': heatmap_x_ticks,
     'y_ticks': heatmap_y_ticks,
+    'hovertext': heatmap_ifg_cml_hovertext,
     'colorscale': ifg_colorscale,
     'conf': plot_conf
   };
   /* plot the heatmap: */
   plot_heatmap(heatmap_ifg_cml_options);
 
-  /* incremental ifg plot: */
+  /* --- incremental ifg plot: --- */
 
+  /* get incremental data: */
   var ifg_inc = ifgs_inc[ifgs_inc.length - 1];
+  /* get min and max values: */
   var ifg_inc_min = Math.min.apply(Math, ifg_inc.flat());
   var ifg_inc_max = Math.max.apply(Math, ifg_inc.flat());
-
+  /* calculate min and max values for plotting: */
   var ifg_inc_z_max = Math.max(Math.abs(ifg_inc_min), Math.abs(ifg_inc_max));
   var ifg_inc_z_min = -1 * ifg_inc_z_max;
+  /* create hovertext: */
+  var heatmap_ifg_inc_hovertext = [];
+  for (var i = 0; i < lats.length; i++) {
+    heatmap_ifg_inc_hovertext[i] = [];
+    for (var j = 0; j < lons.length; j++) {
+      if (dem[i][j] == 'null') {
+        var value_text = 'null';
+      } else {
+        var value_text = dem[i][j].toFixed(4);
+      };
+      heatmap_ifg_inc_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
+                                        'lon: ' + lons[j] + '<br>' +
+                                        value_text;
+      };
+  };
 
   /* plot options for incremental ifg heatmap: */
   var heatmap_ifg_inc_options = {
@@ -348,6 +379,7 @@ function plot_data() {
     'z_max': ifg_inc_z_max,
     'x_ticks': heatmap_x_ticks,
     'y_ticks': heatmap_y_ticks,
+    'hovertext': heatmap_ifg_inc_hovertext,
     'colorscale': ifg_colorscale,
     'conf': plot_conf
   };
@@ -356,124 +388,49 @@ function plot_data() {
 
 
 
+  /*  --- ic plot: --- */
 
-
-
-
-
-
-  /* ic plot: */
-
-  var heatmap_data = [];
-
-  var heatmap_hovertext = [];
+  /* get the ic data: */
+  var ic = tc_sources[0];
+  /* create hovertext: */
+  var heatmap_ic_hovertext = [];
   for (var i = 0; i < lats.length; i++) {
-    heatmap_hovertext[i] = [];
+    heatmap_ic_hovertext[i] = [];
     for (var j = 0; j < lons.length; j++) {
-
-      if (tc_sources[0][i][j] == 'null') {
+      if (ic[i][j] == null) {
         var value_text = 'null';
       } else {
-        var value_text = tc_sources[0][i][j] + 'm';
+        var value_text = ic[i][j] + 'm';
       };
-
-      heatmap_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
-                                'lon: ' + lons[j] + '<br>' +
-                                'IC: ' + value_text;
+      heatmap_ic_hovertext[i][j] = 'lat: ' + lats[i] + '<br>' +
+                                   'lon: ' + lons[j] + '<br>' +
+                                   'IC: ' + value_text;
       };
   };
 
-  var heatmap_colorbar = {
-    'tickvals': [ic_min, ic_max],
-    'ticktext': [
-      (ic_min + '        ').substr(0, 8),
-      (ic_max + '        ').substr(0, 8),
-    ],
-    'tickfont': {
-      'size': 10
-    },
-    'orientation': 'v',
-    'thickness': 15,
-    'len': 0.9
-  };
-
-  var heatmap = {
-    'type': 'heatmap',
+  /* plot options for ic heatmap: */
+  var heatmap_ic_options = {
+    'div': heatmap_ic_div,
+    'title': 'IC0',
     'x': lons,
+    'x_min': lons_min,
+    'x_max': lons_max,
     'y': lats,
-    'z': tc_sources[0],
-    'zmin': ic_min,
-    'zmax': ic_max,
-    'colorscale': ic_colorscale,
-    'colorbar': heatmap_colorbar,
-    'hoverinfo': 'text',
-    'text': heatmap_hovertext,
-    'showlegend': false
+    'y_min': lats_min,
+    'y_max': lats_max,
+    'z': ic,
+    'z_min': ic_min,
+    'z_max': ic_max,
+    'x_ticks': heatmap_x_ticks,
+    'y_ticks': heatmap_y_ticks,
+    'hovertext': heatmap_ic_hovertext,
+    'colorscale': ifg_colorscale,
+    'conf': plot_conf
   };
-  heatmap_data.push(heatmap);
+  /* plot the heatmap: */
+  plot_heatmap(heatmap_ic_options);
 
-  var heatmap_xticks = [];
-  var heatmap_yticks = [];
-  var heatmap_nticks = 2;
-  var heatmap_xtick_inc = (lons_max - lons_min) / (heatmap_nticks * 2);
-  for (var i = 0; i < heatmap_nticks; i++) {
-    heatmap_xticks.push(
-      (lons_min + ((i + (i +1)) * heatmap_xtick_inc)).toFixed(2)
-    );
-  };
-  var heatmap_ytick_inc = (lats_max - lats_min) / (heatmap_nticks * 2);
-  for (var i = 0; i < heatmap_nticks; i++) {
-    heatmap_yticks.push(
-      (lats_min + ((i + (i +1)) * heatmap_ytick_inc)).toFixed(2)
-    );
-  };
 
-  var heatmap_layout = {
-    'title': {
-      'text': 'IC0',
-      'x': 0.16,
-      'y': 0.85
-    },
-    'xaxis': {
-      'title': '',
-      'tickmode': 'array',
-      'tickvals': heatmap_xticks,
-      'range': [lons_min, lons_max],
-      'autorange': false,
-      'constrain': 'domain',
-      'scaleanchor': 'y',
-      'scaleratio': 1,
-      'zeroline': false,
-      'showline': true,
-      'showgrid': true,
-      'mirror': true
-    },
-    'yaxis': {
-      'title': '',
-      'tickmode': 'array',
-      'tickvals': heatmap_yticks,
-      'range': [lats_min, lats_max],
-      'autorange': false,
-      'constrain': 'domain',
-      'zeroline': false,
-      'showline': true,
-      'showgrid': true,
-      'mirror': true
-    },
-    'modebar': {
-      'orientation': 'h',
-    },
-    'margin': {
-      't': 50,
-      'b': 50,
-      'r': 50,
-      'l': 50
-    },
-  };
-
-  var heatmap_plot = Plotly.newPlot(
-    ic_plot_div, heatmap_data, heatmap_layout, plot_conf
-  );
 
   /* tc time series plot: */
 
@@ -619,7 +576,7 @@ function plot_data() {
   };
 
   var scatter_plot = Plotly.newPlot(
-    ts_plot_div, scatter_data, scatter_layout, plot_conf
+    ts_ic_div, scatter_data, scatter_layout, plot_conf
   );
 
 };
