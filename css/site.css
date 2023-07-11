@@ -60,34 +60,26 @@ body {
 .navigation {
   color: #ffffff;
   background-color: #0e1c3f;
-  display: flex;
-  flex: 1 1 auto;
-  flex-flow: row nowrap;
-  justify-content: flex-start;
   min-height: 1em;
 }
 
 /** content: **/
 
-.text_section {
+.text_section,
+.plot_section {
   margin: 0;
   padding: 0;
 }
 
 .text_container {
+  background-color: #ffffff;
   margin-top: 0.25em;
   margin-bottom: 0.25em;
   padding: 0.5em;
-  background-color: #ffffff;
 }
 
 .text_container h2, label {
   color: #0e1c3f;
-}
-
-.plot_section {
-  margin: 0;
-  padding: 0;
 }
 
 .plot_container {
@@ -123,11 +115,6 @@ body {
 /** footer: **/
 
 .footer {
-  color: #ffffff;
   background-color: #272727;
-  display: flex;
-  flex: 1 1 auto;
-  flex-flow: row nowrap;
-  justify-content: flex-start;
   min-height: 2em;
 }

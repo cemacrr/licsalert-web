@@ -66,6 +66,8 @@ var plot_vars = {
 
 /* add volcano name and frame text to page: */
 async function add_text(volcano_name, frame) {
+  /* set the page title: */
+  document.title = 'LiCSAlert - ' + volcano_name + ' ' + frame;
   /* div for text content: */
   var text_div = plot_vars['text_div'];
   /* create div for text: */
