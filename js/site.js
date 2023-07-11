@@ -700,8 +700,13 @@ function plot_data() {
 
 /* page loading / set up function: */
 async function load_page() {
+  /* region / volcano / frame: */
+  var region = 'africa';
+  var volcano = 'erta_ale';
+  var volcano_name = 'Erta Ale';
+  var frame = '079D_07694_131313';
   /* data file to load: */
-  var data_file = 'africa/erta_ale_079D_07694_131313.json';
+  var data_file = region + '/' + volcano + '_' + frame + '.json';
   /* load the data: */
   await load_data(data_file);
   /* if data loading failed, give up: */
