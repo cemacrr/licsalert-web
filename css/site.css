@@ -13,6 +13,7 @@ body {
 
 .container {
   min-height: 100vh;
+  width: calc(100% - 0.5em);
   max-width: 1870px;
   margin: auto;
 }
@@ -21,8 +22,6 @@ body {
 
 .header {
   background-color: #ffffff;
-  width: calc(100% - 0.5em);
-  margin: auto;
   height: 90px;
   display: flex;
   flex: 1 1 auto;
@@ -61,8 +60,6 @@ body {
 .navigation {
   color: #ffffff;
   background-color: #0e1c3f;
-  width: calc(100% - 0.5em);
-  margin: auto;
   display: flex;
   flex: 1 1 auto;
   flex-flow: row nowrap;
@@ -72,6 +69,22 @@ body {
 
 /** content: **/
 
+.text_section {
+  margin: 0;
+  padding: 0;
+}
+
+.text_container {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+  padding: 0.5em;
+  background-color: #ffffff;
+}
+
+.text_container h2, label {
+  color: #0e1c3f;
+}
+
 .plot_section {
   margin: 0;
   padding: 0;
@@ -79,8 +92,6 @@ body {
 
 .plot_container {
   background-color: #ffffff;
-  width: calc(100% - 0.5em);
-  margin: auto;
   margin-top: 0.25em;
   margin-bottom: 0.25em;
   display: flex;
@@ -114,8 +125,6 @@ body {
 .footer {
   color: #ffffff;
   background-color: #272727;
-  width: calc(100% - 0.5em);
-  margin: auto;
   display: flex;
   flex: 1 1 auto;
   flex-flow: row nowrap;

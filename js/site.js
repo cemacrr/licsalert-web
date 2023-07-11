@@ -4,12 +4,14 @@
 
 /* store things in plot_vars: */
 var plot_vars = {
+  /* div for text content: */
+  'text_div': document.getElementById('content_text'),
   /* prefix for data: */
   'data_prefix': 'data/',
   /* store plot data here: */
   'plot_data': null,
-  /* div for dem plotting: */
-  'heatmap_dem_div': document.getElementById('heatmap_dem'),
+  /* div for heatmap plotting: */
+  'heatmap_div': document.getElementById('heatmap_plots'),
   /* min and max for dem plotting: */
   'dem_min': 0,
   'dem_max': 1000,
@@ -19,10 +21,6 @@ var plot_vars = {
     [0.5, 'rgb(217, 216, 98)'],
     [1, 'rgb(96, 17, 5)'],
   ],
-  /* div for cumulative ifg plotting: */
-  'heatmap_ifg_cml_div': document.getElementById('heatmap_ifg_cml'),
-  /* div for incremental ifg plotting: */
-  'heatmap_ifg_inc_div': document.getElementById('heatmap_ifg_inc'),
   /* colorscale for ifg plotting: */
   'ifg_colorscale': [
     [0, 'rgb(0, 0, 254)'],
@@ -65,6 +63,25 @@ var plot_vars = {
 };
 
 /** functions: **/
+
+/* add volcano name and frame text to page: */
+async function add_text(volcano_name, frame) {
+  /* div for text content: */
+  var text_div = plot_vars['text_div'];
+  /* create div for text: */
+  var text_00_div = document.createElement("div");
+  text_00_div.id = 'content_text_00';
+  text_00_div.classList = 'text_container';
+  text_div.appendChild(text_00_div);
+  /* add volcano name header: */
+  var volcano_name_h = document.createElement("h2");
+  volcano_name_h.innerHTML = volcano_name;
+  text_00_div.appendChild(volcano_name_h);
+  /* add volcano frame paragraph: */
+  var volcano_frame_p = document.createElement("p");
+  volcano_frame_p.innerHTML = '<label>Frame ID:</label> ' + frame;
+  text_00_div.appendChild(volcano_frame_p);
+};
 
 /* data loading from json function: */
 async function load_data(data_file) {
@@ -400,12 +417,10 @@ function plot_ts(plot_options) {
 /* data plotting function: */
 function plot_data() {
   /* get required plotting variables: */
-  var heatmap_dem_div = plot_vars['heatmap_dem_div'];
+  var heatmap_div = plot_vars['heatmap_div'];
   var dem_min = plot_vars['dem_min'];
   var dem_max = plot_vars['dem_max'];
   var dem_colorscale = plot_vars['dem_colorscale'];
-  var heatmap_ifg_cml_div = plot_vars['heatmap_ifg_cml_div'];
-  var heatmap_ifg_inc_div = plot_vars['heatmap_ifg_inc_div'];
   var ifg_colorscale = plot_vars['ifg_colorscale'];
   var ic_div = plot_vars['ic_div'];
   var ic_min = plot_vars['ic_min'];
@@ -464,11 +479,24 @@ function plot_data() {
     );
   };
 
+  /* create div for heatmap plots: */
+  var heatmap_plot_container = document.createElement("div");
+  heatmap_plot_container.id = 'heatmap_plot_container';
+  heatmap_plot_container.classList = 'plot_container';
+  heatmap_div.appendChild(heatmap_plot_container);
+
   /* --- dem plot: --- */
+
+  /* create div for heatmap plot: */
+  var heatmap_dem_div = document.createElement("div");
+  var heatmap_dem_id = 'heatmap_dem';
+  heatmap_dem_div.id = heatmap_dem_id;
+  heatmap_dem_div.classList = 'heatmap_plot';
+  heatmap_plot_container.appendChild(heatmap_dem_div);
 
   /* plot options for dem heatmap: */
   var heatmap_dem_options = {
-    'div': heatmap_dem_div,
+    'div': heatmap_dem_id,
     'title': 'DEM',
     'x': lons,
     'x_min': lons_min,
@@ -499,6 +527,13 @@ function plot_data() {
 
   /* --- cumulative ifg plot: --- */
 
+  /* create div for heatmap plot: */
+  var heatmap_ifg_cml_div = document.createElement("div");
+  var heatmap_ifg_cml_id = 'heatmap_ifg_cml';
+  heatmap_ifg_cml_div.id = heatmap_ifg_cml_id;
+  heatmap_ifg_cml_div.classList = 'heatmap_plot';
+  heatmap_plot_container.appendChild(heatmap_ifg_cml_div);
+
   /* get cumulative data: */
   var ifg_cml = ifgs_cml[ifgs_cml.length - 1];
   /* get min and max values: */
@@ -510,7 +545,7 @@ function plot_data() {
 
   /* plot options for cumulative ifg heatmap: */
   var heatmap_ifg_cml_options = {
-    'div': heatmap_ifg_cml_div,
+    'div': heatmap_ifg_cml_id,
     'title': 'Cumulative',
     'x': lons,
     'x_min': lons_min,
@@ -541,6 +576,13 @@ function plot_data() {
 
   /* --- incremental ifg plot: --- */
 
+  /* create div for heatmap plot: */
+  var heatmap_ifg_inc_div = document.createElement("div");
+  var heatmap_ifg_inc_id = 'heatmap_ifg_inc';
+  heatmap_ifg_inc_div.id = heatmap_ifg_inc_id;
+  heatmap_ifg_inc_div.classList = 'heatmap_plot';
+  heatmap_plot_container.appendChild(heatmap_ifg_inc_div);
+
   /* get incremental data: */
   var ifg_inc = ifgs_inc[ifgs_inc.length - 1];
   /* get min and max values: */
@@ -552,7 +594,7 @@ function plot_data() {
 
   /* plot options for incremental ifg heatmap: */
   var heatmap_ifg_inc_options = {
-    'div': heatmap_ifg_inc_div,
+    'div': heatmap_ifg_inc_id,
     'title': 'Incremental',
     'x': lons,
     'x_min': lons_min,
@@ -639,7 +681,7 @@ function plot_data() {
     };
     /* plot the heatmap: */
     plot_heatmap(heatmap_ic_options);
- 
+
     /* plot options for ic time series: */
     var ts_ic_options = {
       'div': ts_ic_id,
@@ -705,6 +747,8 @@ async function load_page() {
   var volcano = 'erta_ale';
   var volcano_name = 'Erta Ale';
   var frame = '079D_07694_131313';
+  /* add the text to the page: */
+  await add_text(volcano_name, frame);
   /* data file to load: */
   var data_file = region + '/' + volcano + '_' + frame + '.json';
   /* load the data: */
