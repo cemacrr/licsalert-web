@@ -70,6 +70,8 @@ async function add_text(volcano_name, frame) {
   document.title = 'LiCSAlert - ' + volcano_name + ' ' + frame;
   /* div for text content: */
   var text_div = plot_vars['text_div'];
+  /* wipe out content: */
+  text_div.innerHTML = '';
   /* create div for text: */
   var text_00_div = document.createElement("div");
   text_00_div.id = 'content_text_00';
@@ -480,6 +482,11 @@ function plot_data() {
       )
     );
   };
+
+  /* wipe out any exiting content: */
+  residuals_div.innerHTML = '';
+  ic_div.innerHTML = '';
+  heatmap_div.innerHTML = '';
 
   /* create div for heatmap plots: */
   var heatmap_plot_container = document.createElement("div");
