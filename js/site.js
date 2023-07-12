@@ -12,9 +12,8 @@ var plot_vars = {
   'plot_data': null,
   /* div for heatmap plotting: */
   'heatmap_div': document.getElementById('heatmap_plots'),
-  /* min and max for dem plotting: */
+  /* min for dem plotting: */
   'dem_min': 0,
-  'dem_max': 1000,
   /* colorscale for dem plotting: */
   'dem_colorscale': [
     [0, 'rgb(85, 142, 49)'],
@@ -203,7 +202,13 @@ function plot_heatmap(plot_options) {
       'y': 0.85
     },
     'xaxis': {
-      'title': '',
+      'title': {
+        'text': 'longitude',
+        'font': {
+          'size': 10
+        },
+        'standoff': 5
+      },
       'tickmode': 'array',
       'tickvals': x_ticks,
       'range': [x_min, x_max],
@@ -217,7 +222,13 @@ function plot_heatmap(plot_options) {
       'mirror': true
     },
     'yaxis': {
-      'title': '',
+      'title': {
+        'text': 'latitude',
+        'font': {
+          'size': 10
+        },
+        'standoff': 5
+      },
       'tickmode': 'array',
       'tickvals': y_ticks,
       'range': [y_min + 0.0001, y_max - 0.0001],
@@ -423,7 +434,6 @@ function plot_data() {
   /* get required plotting variables: */
   var heatmap_div = plot_vars['heatmap_div'];
   var dem_min = plot_vars['dem_min'];
-  var dem_max = plot_vars['dem_max'];
   var dem_colorscale = plot_vars['dem_colorscale'];
   var ifg_colorscale = plot_vars['ifg_colorscale'];
   var ic_div = plot_vars['ic_div'];
@@ -460,6 +470,8 @@ function plot_data() {
   var lats_max = Math.max.apply(Math, lats);
   var lons_min = Math.min.apply(Math, lons);
   var lons_max = Math.max.apply(Math, lons);
+  var dem_max = Math.max.apply(Math, dem.flat());
+  dem_max = Math.ceil(dem_max / 1000) * 1000;
 
   /* calculate x and y ticks for heatmaps: */
   var heatmap_n_ticks = 2;
@@ -577,7 +589,7 @@ function plot_data() {
     'z_units': 'm',
     'z_dp': 4,
     'colorscale': ifg_colorscale,
-    'colorbar_title': null,
+    'colorbar_title': 'displacement (m)',
     'conf': plot_conf
   };
   /* plot the heatmap: */
@@ -626,7 +638,7 @@ function plot_data() {
     'z_units': 'm',
     'z_dp': 4,
     'colorscale': ifg_colorscale,
-    'colorbar_title': null,
+    'colorbar_title': 'displacement (m)',
     'conf': plot_conf
   };
   /* plot the heatmap: */
@@ -685,7 +697,7 @@ function plot_data() {
       'z_units': 'm',
       'z_dp': 4,
       'colorscale': ifg_colorscale,
-      'colorbar_title': 'IC (m)',
+      'colorbar_title': 'displacement (m)',
       'conf': plot_conf
     };
     /* plot the heatmap: */
@@ -753,9 +765,17 @@ function plot_data() {
 async function load_page() {
   /* region / volcano / frame: */
   var region = 'africa';
+
+  /* */
   var volcano = 'erta_ale';
   var volcano_name = 'Erta Ale';
   var frame = '079D_07694_131313';
+  /* */
+//  var volcano = 'ol_doinyo_lengai';
+//  var volcano_name = 'Ol Doinyo Lengai';
+//  var frame = '130A_09212_131313';
+  /* */
+
   /* add the text to the page: */
   await add_text(volcano_name, frame);
   /* data file to load: */
