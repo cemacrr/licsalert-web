@@ -84,6 +84,16 @@ async function add_text(volcano_name, frame) {
   var volcano_frame_p = document.createElement("p");
   volcano_frame_p.innerHTML = '<label>Frame ID:</label> ' + frame;
   text_00_div.appendChild(volcano_frame_p);
+  /* get dates for ifgs: */
+  var ifg_dates = plot_vars['plot_data']['dates'];
+  var start_date = ifg_dates[0];
+  var end_date = ifg_dates[ifg_dates.length - 1];
+  var prev_date = ifg_dates[ifg_dates.length - 2];
+  /* add ifg dates paragraphs: */
+  var volcano_ifg_dates_p = document.createElement("p");
+  volcano_ifg_dates_p.innerHTML = '<label>Cumulative Dates:</label> ' + start_date + ' - ' + end_date + '<br>';
+  volcano_ifg_dates_p.innerHTML += '<label>Incremental Dates:</label> ' + prev_date + ' - ' + end_date;
+  text_00_div.appendChild(volcano_ifg_dates_p);
 };
 
 /* data loading from json function: */
@@ -776,8 +786,6 @@ async function load_page() {
 //  var frame = '130A_09212_131313';
   /* */
 
-  /* add the text to the page: */
-  await add_text(volcano_name, frame);
   /* data file to load: */
   var data_file = region + '/' + volcano + '_' + frame + '.json';
   /* load the data: */
@@ -788,6 +796,8 @@ async function load_page() {
   };
   /* log data loaded message: */
   console.log('* loaded data from file: ' + data_file);
+  /* add the text to the page: */
+  await add_text(volcano_name, frame);
   /* plot the data: */
   plot_data();
 };
