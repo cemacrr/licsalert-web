@@ -773,19 +773,6 @@ function plot_data() {
 
 /* page loading / set up function: */
 async function load_page() {
-  /* region / volcano / frame: */
-  var region = 'africa';
-
-  /* */
-  var volcano = 'erta_ale';
-  var volcano_name = 'Erta Ale';
-  var frame = '079D_07694_131313';
-  /* */
-//  var volcano = 'ol_doinyo_lengai';
-//  var volcano_name = 'Ol Doinyo Lengai';
-//  var frame = '130A_09212_131313';
-  /* */
-
   /* data file to load: */
   var data_file = region + '/' + volcano + '_' + frame + '.json';
   /* load the data: */
