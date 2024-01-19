@@ -4,10 +4,14 @@
 
 /* store things in plot_vars: */
 var plot_vars = {
+  /* possible frames for this volcano: */
+  'frame_ids': null,
+  /* currently selected frames: */
+  'frame_id': null,
   /* div for text content: */
   'text_div': document.getElementById('content_text'),
   /* prefix for data: */
-  'data_prefix': 'licsalert_data/',
+  'data_prefix': 'licsalert_data',
   /* directory within each volcano / frame directory which contains licsalert
      data: */
   'data_dir': 'json_data',
@@ -70,9 +74,9 @@ var plot_vars = {
 /** functions: **/
 
 /* add volcano name and frame text to page: */
-async function add_text(volcano_name, frame) {
+async function add_text(volcano_name, frame_id) {
   /* set the page title: */
-  document.title = 'LiCSAlert - ' + volcano_name + ' ' + frame;
+  document.title = 'LiCSAlert - ' + volcano_name + ' ' + frame_id;
   /* div for text content: */
   var text_div = plot_vars['text_div'];
   /* wipe out content: */
@@ -88,7 +92,7 @@ async function add_text(volcano_name, frame) {
   text_00_div.appendChild(volcano_name_h);
   /* add volcano frame paragraph: */
   var volcano_frame_p = document.createElement("p");
-  volcano_frame_p.innerHTML = '<label>Frame ID:</label> ' + frame;
+  volcano_frame_p.innerHTML = '<label>Frame ID:</label> ' + frame_id;
   text_00_div.appendChild(volcano_frame_p);
   /* get dates for ifgs: */
   var ifg_dates = plot_vars['plot_data']['dates'];
@@ -99,6 +103,42 @@ async function add_text(volcano_name, frame) {
   volcano_ifg_dates_p.innerHTML = '<label>Cumulative Dates:</label> ' + start_date + ' - ' + end_date + '<br>';
   volcano_ifg_dates_p.innerHTML += '<label>Incremental Date:</label> ' + end_date;
   text_00_div.appendChild(volcano_ifg_dates_p);
+};
+
+/* function to get list of available frames: */
+async function get_frames() {
+  /* sort frames by time - most recent first: */
+  frames.sort(function(a, b) {return b['mtime'] - a['mtime'];});
+  /* init arrays for storing 'good' frames, where data is available, and 'bad'
+     frames for which we do not have data: */
+  var frames_good = [];
+  var frames_bad = [];
+  /* frame modification times, for sorting: */
+  /* loop through all frames: */
+  for (var i = 0; i < frames.length; i++) {
+    /* get frame id: */
+    var frame_id = frames[i]['id'];
+    /* data file name for this frame id: */
+    var data_file = plot_vars['data_prefix'] + '/' + region + '/' + volcano +
+                    '_' + frame_id + '/' + plot_vars['data_dir'] +
+                    '/licsalert_data.json';
+    /* check data with fetch: */
+    var data_url = new Request(data_file, { method: 'HEAD'});
+    var data_req = await fetch(data_url);
+    /* if successful: */
+    if (data_req.status == 200) {
+      /* store as good frame: */
+      frames_good.push(frame_id);
+    } else {
+      /* else, store as bad frame: */
+      frames_bad.push(frame_id);
+    };
+  };
+  /* all frames: */
+  var frame_ids = frames_good.concat(frames_bad);
+  /* sotre all frames and set current frame to first in list: */
+  plot_vars['frame_ids'] = frame_ids;
+  plot_vars['frame_id'] = frame_ids[0];
 };
 
 /* data loading from json function: */
@@ -464,6 +504,7 @@ function plot_ts(plot_options) {
 /* data plotting function: */
 async function plot_data() {
   /* get required plotting variables: */
+  var frame_id = plot_vars['frame_id'];
   var heatmap_div_a = plot_vars['heatmap_div_a'];
   var heatmap_div_b = plot_vars['heatmap_div_b'];
   var dem_min = plot_vars['dem_min'];
@@ -504,7 +545,7 @@ async function plot_data() {
   };
   plot_vars['ifg_date'] = ifg_date;
   /* json file for ifg data: */
-  var ifg_data_file = region + '/' + volcano + '_' + frame + '/' +
+  var ifg_data_file = region + '/' + volcano + '_' + frame_id + '/' +
                       plot_vars['data_dir'] + '/' + ifg_date + '.json';
   /* load the data: */
   await load_data(ifg_data_file, true);
@@ -517,7 +558,7 @@ async function plot_data() {
   var ifg_resid = plot_data['ifg_resid'];
 
   /* add the text to the page: */
-  await add_text(volcano_name, frame);
+  await add_text(volcano_name, frame_id);
 
   /* calculate some possibly useful values: */
   var lats_min = Math.min.apply(Math, lats);
@@ -916,8 +957,12 @@ async function plot_data() {
 
 /* page loading / set up function: */
 async function load_page() {
+  /* get / check available frames: */
+  await get_frames();
+  /* get current frame: */
+  var frame_id = plot_vars['frame_id'];
   /* data file to load: */
-  var data_file = region + '/' + volcano + '_' + frame + '/' +
+  var data_file = region + '/' + volcano + '_' + frame_id + '/' +
                   plot_vars['data_dir'] + '/licsalert_data.json';
   /* load the data: */
   await load_data(data_file);

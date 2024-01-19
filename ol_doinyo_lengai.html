@@ -28,10 +28,17 @@
     </script>
     <script>
       /* set region / volcano / frame: */
-      var region = 'africa';
+      var this_volcano = {
+        'frames': [
+         {'track': '130A', 'id': '130A_09212_131313', 'mtime': 1705457477},
+         {'track': '152D', 'id': '152D_09315_131313', 'mtime': 1701574048}
+        ],
+        'region':'africa'
+      };
+      var region = this_volcano['region'];
       var volcano = 'ol_doinyo_lengai';
       var volcano_name = 'Ol Doinyo Lengai';
-      var frame = '130A_09212_131313';
+      var frames = this_volcano['frames'];
     </script>
   <!-- head end:___________________________________________________________ -->
   </head>
