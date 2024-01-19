@@ -7,9 +7,14 @@ var plot_vars = {
   /* div for text content: */
   'text_div': document.getElementById('content_text'),
   /* prefix for data: */
-  'data_prefix': 'data/',
+  'data_prefix': 'licsalert_data/',
+  /* directory within each volcano / frame directory which contains licsalert
+     data: */
+  'data_dir': 'json_data',
   /* store plot data here: */
   'plot_data': null,
+  /* current end date for incremental cumulative ifg plotting: */
+  'ifg_date': null,
   /* div for heatmap plotting: */
   'heatmap_div': document.getElementById('heatmap_plots'),
   /* min for dem plotting: */
@@ -87,30 +92,44 @@ async function add_text(volcano_name, frame) {
   /* get dates for ifgs: */
   var ifg_dates = plot_vars['plot_data']['dates'];
   var start_date = ifg_dates[0];
-  var end_date = ifg_dates[ifg_dates.length - 1];
-  var prev_date = ifg_dates[ifg_dates.length - 2];
+  var end_date = plot_vars['ifg_date'];
   /* add ifg dates paragraphs: */
   var volcano_ifg_dates_p = document.createElement("p");
   volcano_ifg_dates_p.innerHTML = '<label>Cumulative Dates:</label> ' + start_date + ' - ' + end_date + '<br>';
-  volcano_ifg_dates_p.innerHTML += '<label>Incremental Dates:</label> ' + prev_date + ' - ' + end_date;
+  volcano_ifg_dates_p.innerHTML += '<label>Incremental Date:</label> ' + end_date;
   text_00_div.appendChild(volcano_ifg_dates_p);
 };
 
 /* data loading from json function: */
-async function load_data(data_file) {
+async function load_data(data_file, ifg_data=false) {
   /* url to data file: */
   let data_url = plot_vars['data_prefix'] + '/' + data_file;
   /* get data using fetch: */
   var data_req = await fetch(data_url);
   /* if successful: */
   if (data_req.status == 200) {
-    /* store json information from request: */
-    plot_vars['plot_data'] = await data_req.json();
+    /* store json information from request. if ifg data: */
+    if (ifg_data == true) {
+      var req_data = await data_req.json();
+      plot_vars['plot_data']['ifg_inc'] = req_data['ifg_inc'];
+      plot_vars['plot_data']['ifg_cml'] = req_data['ifg_cml'];
+    /* else, getting plot data: */
+    } else {
+      plot_vars['plot_data'] = await data_req.json();
+    };
   } else {
     /* log error: */
     console.log('* failed to load data from: ' + data_url);
-    /* plot data is null: */
-    plot_vars['plot_data'] = null;
+    /* if getting ifg data: */
+    if (ifg_data == true) {
+      /* ifg data is null: */
+      plot_vars['plot_data']['ifg_inc'] = null;
+      plot_vars['plot_data']['ifg_cml'] = null;
+    /* else, getting plot data: */
+    } else {
+      /* plot data is null: */
+      plot_vars['plot_data'] = null;
+    };
   };
 };
 
@@ -440,7 +459,7 @@ function plot_ts(plot_options) {
 };
 
 /* data plotting function: */
-function plot_data() {
+async function plot_data() {
   /* get required plotting variables: */
   var heatmap_div = plot_vars['heatmap_div'];
   var dem_min = plot_vars['dem_min'];
@@ -464,8 +483,6 @@ function plot_data() {
   var lats = plot_data['lats'];
   var lons = plot_data['lons'];
   var dem = plot_data['dem'];
-  var ifgs_inc = plot_data['ifgs_inc'];
-  var ifgs_cml = plot_data['ifgs_cml'];
   var tc_count = plot_data['tc_count'];
   var tc_sources = plot_data['tc_sources'];
   var tc_cml = plot_data['tc_cml'];
@@ -474,6 +491,27 @@ function plot_data() {
   var residuals = plot_data['residuals'];
   var residuals_distances = plot_data['residuals_distances'];
   var residuals_lines = plot_data['residuals_lines'];
+
+  /* check date for incremental and cumulative ifg and get data: */
+  var ifg_date = plot_vars['ifg_date'];
+  /* set to most recent if not defined: */
+  if (ifg_date == undefined) {
+    ifg_date = dates.slice(-1);
+  };
+  plot_vars['ifg_date'] = ifg_date;
+  /* json file for ifg data: */
+  var ifg_data_file = region + '/' + volcano + '_' + frame + '/' +
+                      plot_vars['data_dir'] + '/' + ifg_date + '.json';
+  /* load the data: */
+  await load_data(ifg_data_file, true);
+  /* log data loaded message: */
+  console.log('* loaded data from file: ' + ifg_data_file);
+  /* get ifg data: */
+  var ifg_inc = plot_data['ifg_inc'];
+  var ifg_cml = plot_data['ifg_cml'];
+
+  /* add the text to the page: */
+  await add_text(volcano_name, frame);
 
   /* calculate some possibly useful values: */
   var lats_min = Math.min.apply(Math, lats);
@@ -565,8 +603,6 @@ function plot_data() {
   heatmap_ifg_cml_div.classList = 'heatmap_plot';
   heatmap_plot_container.appendChild(heatmap_ifg_cml_div);
 
-  /* get cumulative data: */
-  var ifg_cml = ifgs_cml[ifgs_cml.length - 1];
   /* get min and max values: */
   var ifg_cml_min = Math.min.apply(Math, ifg_cml.flat());
   var ifg_cml_max = Math.max.apply(Math, ifg_cml.flat());
@@ -614,8 +650,6 @@ function plot_data() {
   heatmap_ifg_inc_div.classList = 'heatmap_plot';
   heatmap_plot_container.appendChild(heatmap_ifg_inc_div);
 
-  /* get incremental data: */
-  var ifg_inc = ifgs_inc[ifgs_inc.length - 1];
   /* get min and max values: */
   var ifg_inc_min = Math.min.apply(Math, ifg_inc.flat());
   var ifg_inc_max = Math.max.apply(Math, ifg_inc.flat());
@@ -703,11 +737,11 @@ function plot_data() {
       'z': ic,
       'z_min': ic_min,
       'z_max': ic_max,
-      'z_label': 'displacement',
-      'z_units': 'm',
+      'z_label': 'value',
+      'z_units': '',
       'z_dp': 4,
       'colorscale': ifg_colorscale,
-      'colorbar_title': 'displacement (m)',
+      'colorbar_title': '',
       'conf': plot_conf
     };
     /* plot the heatmap: */
@@ -774,7 +808,8 @@ function plot_data() {
 /* page loading / set up function: */
 async function load_page() {
   /* data file to load: */
-  var data_file = region + '/' + volcano + '_' + frame + '.json';
+  var data_file = region + '/' + volcano + '_' + frame + '/' +
+                  plot_vars['data_dir'] + '/licsalert_data.json';
   /* load the data: */
   await load_data(data_file);
   /* if data loading failed, give up: */
@@ -783,8 +818,6 @@ async function load_page() {
   };
   /* log data loaded message: */
   console.log('* loaded data from file: ' + data_file);
-  /* add the text to the page: */
-  await add_text(volcano_name, frame);
   /* plot the data: */
   plot_data();
 };
