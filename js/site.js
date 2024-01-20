@@ -18,11 +18,8 @@ var plot_vars = {
   'data_dir': 'json_data',
   /* store plot data here: */
   'plot_data': null,
-  /* current end date for incremental cumulative ifg plotting: */
-  'ifg_date': null,
-  /* divs for heatmap plotting: */
-  'heatmap_div_a': document.getElementById('heatmap_plots_a'),
-  'heatmap_div_b': document.getElementById('heatmap_plots_b'),
+  /* div for heatmap plotting: */
+  'heatmap_div': document.getElementById('heatmap_plots'),
   /* min for dem plotting: */
   'dem_min': 0,
   /* colorscale for dem plotting: */
@@ -139,10 +136,15 @@ async function get_frames() {
   for (var i = 0; i < frames.length; i++) {
     /* get frame id: */
     var frame_id = frames[i]['id'];
+    /* init plot var for this frame id: */
+    if (plot_vars[frame_id] == undefined) {
+      plot_vars[frame_id] = {};
+    };
     /* data file name for this frame id: */
     var data_file = plot_vars['data_prefix'] + '/' + region + '/' + volcano +
                     '_' + frame_id + '/' + plot_vars['data_dir'] +
                     '/licsalert_data.json';
+
     /* check data with fetch: */
     var data_url = new Request(data_file, { method: 'HEAD'});
     var data_req = await fetch(data_url);
@@ -173,10 +175,8 @@ async function load_data(data_file, ifg_data=false) {
     var error_div = plot_vars['error_div'];
     error_div.innerHTML = '';
     /* clear any plots: */
-    var heatmap_div_a = plot_vars['heatmap_div_a'];
-    heatmap_div_a.innerHTML = '';
-    var heatmap_div_b = plot_vars['heatmap_div_b'];
-    heatmap_div_b.innerHTML = '';
+    var heatmap_div = plot_vars['heatmap_div'];
+    heatmap_div.innerHTML = '';
     var ic_div = plot_vars['ic_div'];
     ic_div.innerHTML = '';
     var residuals_div = plot_vars['residuals_div'];
@@ -551,8 +551,7 @@ function plot_ts(plot_options) {
 async function plot_data() {
   /* get required plotting variables: */
   var frame_id = plot_vars['frame_id'];
-  var heatmap_div_a = plot_vars['heatmap_div_a'];
-  var heatmap_div_b = plot_vars['heatmap_div_b'];
+  var heatmap_div = plot_vars['heatmap_div'];
   var dem_min = plot_vars['dem_min'];
   var dem_colorscale = plot_vars['dem_colorscale'];
   var ifg_colorscale = plot_vars['ifg_colorscale'];
@@ -584,12 +583,12 @@ async function plot_data() {
   var residuals_lines = plot_data['residuals_lines'];
 
   /* check date for incremental and cumulative ifg and get data: */
-  var ifg_date = plot_vars['ifg_date'];
+  var ifg_date = plot_vars[frame_id]['ifg_date'];
   /* set to most recent if not defined: */
   if (ifg_date == undefined) {
-    ifg_date = dates.slice(-1);
+    ifg_date = dates.slice(-1)[0];
   };
-  plot_vars['ifg_date'] = ifg_date;
+  plot_vars[frame_id]['ifg_date'] = ifg_date;
   /* json file for ifg data: */
   var ifg_data_file = region + '/' + volcano + '_' + frame_id + '/' +
                       plot_vars['data_dir'] + '/' + ifg_date + '.json';
@@ -636,18 +635,17 @@ async function plot_data() {
   /* wipe out any exiting content: */
   residuals_div.innerHTML = '';
   ic_div.innerHTML = '';
-  heatmap_div_a.innerHTML = '';
-  heatmap_div_b.innerHTML = '';
+  heatmap_div.innerHTML = '';
 
   /* create divs for heatmap plots: */
   var heatmap_plot_container_a = document.createElement('div');
   heatmap_plot_container_a.id = 'heatmap_plot_container_a';
   heatmap_plot_container_a.classList = 'plot_container';
-  heatmap_div_a.appendChild(heatmap_plot_container_a);
+  heatmap_div.appendChild(heatmap_plot_container_a);
   var heatmap_plot_container_b = document.createElement('div');
   heatmap_plot_container_b.id = 'heatmap_plot_container_b';
   heatmap_plot_container_b.classList = 'plot_container';
-  heatmap_div_a.appendChild(heatmap_plot_container_b);
+  heatmap_div.appendChild(heatmap_plot_container_b);
 
   /* --- dem plot: --- */
 
@@ -998,6 +996,84 @@ async function plot_data() {
   plot_ts(ts_residuals_options);
 };
 
+/* add slider: */
+function add_slider() {
+  /* ifg heatmap div to which slider will be added: */
+  var heatmap_div = plot_vars['heatmap_div'];
+  /* get dates: */
+  var dates = plot_vars['plot_data']['dates'];
+  var dates_count = plot_vars['plot_data']['dates_count'];
+  var frame_id = plot_vars['frame_id'];
+  var ifg_date = plot_vars[frame_id]['ifg_date'];
+  /* add container div for slider: */
+  var slider_container_div = document.createElement('div');
+  slider_container_div.id = 'content_slider_00';
+  slider_container_div.classList = 'content_slider';
+  heatmap_div.appendChild(slider_container_div);
+  /* add div for slider: */
+  var slider_div = document.createElement('div');
+  slider_div.id = 'slider_00';
+  slider_div.classList = 'slider';
+  slider_container_div.appendChild(slider_div);
+  /* add div for slider text: */
+  var slider_text_div = document.createElement('div');
+  slider_text_div.id = 'slider_text_00';
+  slider_text_div.classList = 'slider_text';
+  slider_container_div.appendChild(slider_text_div);
+  /* add div for cumulative label: */
+  var slider_cml_div = document.createElement('div');
+  slider_cml_div.id = 'slider_00_cml';
+  slider_cml_div.classList = 'slider_label';
+  slider_text_div.appendChild(slider_cml_div);
+  /* add div for incremental label: */
+  var slider_inc_div = document.createElement('div');
+  slider_inc_div.id = 'slider_00_inc';
+  slider_inc_div.classList = 'slider_label';
+  slider_text_div.appendChild(slider_inc_div);
+  /* set initial date labels: */
+  slider_cml_div.innerHTML = '<label>Cumulative dates:</label> ' + dates[0] +
+                             '-' + ifg_date;
+  slider_inc_div.innerHTML = '<label>Incremental date:</label> ' + ifg_date;
+  /* add slider: */
+  var slider = noUiSlider.create(slider_div, {
+    'start': dates.indexOf(ifg_date),
+    'range': {
+      'min': 0,
+      'max': dates_count
+    },
+    'step': 1,
+    'margin': 1,
+    'tooltips': false,
+  });
+  /* add slide listener: */
+  slider_div.noUiSlider.on('slide', function() {
+    /* get slider value: */
+    var slider_value = slider_div.noUiSlider.get();
+    /* index to int: */
+    var slider_index = parseInt(slider_value);
+    /* ifg date: */
+    var slider_date = plot_vars['plot_data']['dates'][slider_index];
+    /* update labels: */
+    slider_cml_div.innerHTML = '<label>Cumulative dates:</label> ' +
+                               plot_vars['plot_data']['dates'][0] + '-' +
+                               slider_date;
+    slider_inc_div.innerHTML = '<label>Incremental date:</label> ' + slider_date;
+  });
+  /* add change listener: */
+  slider_div.noUiSlider.on('change', function() {
+    /* get slider value: */
+    var slider_value = slider_div.noUiSlider.get();
+    /* index to int: */
+    var slider_index = parseInt(slider_value);
+    /* ifg date: */
+    var slider_date = plot_vars['plot_data']['dates'][slider_index];
+    /* store ifg date: */
+    plot_vars[frame_id]['ifg_date'] = slider_date;
+    /* update the page: */
+    load_page();
+  });
+};
+
 /* page loading / set up function: */
 async function load_page() {
   /* get / check available frames: */
@@ -1018,7 +1094,9 @@ async function load_page() {
   /* log data loaded message: */
   console.log('* loaded data from file: ' + data_file);
   /* plot the data: */
-  plot_data();
+  await plot_data();
+  /* add slider: */
+  add_slider();
 };
 
 /** add listeners: **/

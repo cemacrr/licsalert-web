@@ -15,10 +15,18 @@
     <!-- styles: __________________________________________________________ -->
     <link rel="stylesheet"
           type="text/css"
+          href="css/nouislider.min.css"
+          media="all">
+    <link rel="stylesheet"
+          type="text/css"
           href="css/site.css"
           media="all">
     <!-- scripts: _________________________________________________________ -->
     <script src="js/plotly.js"
+            charset="utf-8"
+            defer>
+    </script>
+    <script src="js/nouislider.min.js"
             charset="utf-8"
             defer>
     </script>
@@ -82,12 +90,8 @@
       <div id="error_text"
            class="text_section">
       </div>
-      <!-- heatmap plots (dem + cumulative): ______________________________ -->
-      <div id="heatmap_plots_a"
-           class="plot_section">
-      </div>
-      <!-- heatmap plots (incremental + reconstruction + residual): _______ -->
-      <div id="heatmap_plots_b"
+      <!-- heatmap plots (dem + ifgs): ____________________________________ -->
+      <div id="heatmap_plots"
            class="plot_section">
       </div>
       <!-- ic plots: ______________________________________________________ -->
