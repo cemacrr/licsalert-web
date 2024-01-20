@@ -63,6 +63,42 @@ body {
   min-height: 1em;
 }
 
+/** buttons: */
+
+button {
+  width: 14em;
+  color: #494949;
+  background-color: #c9c9c9;
+  border: 1px solid #c9c9c9;
+  border-radius: 3px;
+  padding: 3px;
+  margin: 0.3em;
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: 0.3s;
+  transition-timing-function: linear;
+}
+
+button:focus, button:active, button:hover {
+  background-color: #d9d9d9;
+  border: 1px solid #a9a9a9;
+  color: #494949;
+}
+
+button:disabled, button[disabled] {
+  background-color: #494949;
+  border: 1px solid #494949;
+  color: #ffffff;
+  cursor: auto;
+}
+
+/* remove outlines from active buttons: */
+button, button:focus, button:active {
+  outline: 0;
+}
+:focus {outline:none;}
+::-moz-focus-inner {border:0;}
+
 /** content: **/
 
 .text_section,

@@ -10,6 +10,7 @@ var plot_vars = {
   'frame_id': null,
   /* div for text content: */
   'text_div': document.getElementById('content_text'),
+  'error_div': document.getElementById('error_text'),
   /* prefix for data: */
   'data_prefix': 'licsalert_data',
   /* directory within each volcano / frame directory which contains licsalert
@@ -82,27 +83,47 @@ async function add_text(volcano_name, frame_id) {
   /* wipe out content: */
   text_div.innerHTML = '';
   /* create div for text: */
-  var text_00_div = document.createElement("div");
+  var text_00_div = document.createElement('div');
   text_00_div.id = 'content_text_00';
   text_00_div.classList = 'text_container';
   text_div.appendChild(text_00_div);
   /* add volcano name header: */
-  var volcano_name_h = document.createElement("h2");
+  var volcano_name_h = document.createElement('h2');
   volcano_name_h.innerHTML = volcano_name;
   text_00_div.appendChild(volcano_name_h);
-  /* add volcano frame paragraph: */
-  var volcano_frame_p = document.createElement("p");
-  volcano_frame_p.innerHTML = '<label>Frame ID:</label> ' + frame_id;
-  text_00_div.appendChild(volcano_frame_p);
-  /* get dates for ifgs: */
-  var ifg_dates = plot_vars['plot_data']['dates'];
-  var start_date = ifg_dates[0];
-  var end_date = plot_vars['ifg_date'];
-  /* add ifg dates paragraphs: */
-  var volcano_ifg_dates_p = document.createElement("p");
-  volcano_ifg_dates_p.innerHTML = '<label>Cumulative Dates:</label> ' + start_date + ' - ' + end_date + '<br>';
-  volcano_ifg_dates_p.innerHTML += '<label>Incremental Date:</label> ' + end_date;
-  text_00_div.appendChild(volcano_ifg_dates_p);
+  /* add frame select header: */
+  var frame_select_h = document.createElement('h3');
+  frame_select_h.innerHTML = 'Select Frame';
+  text_00_div.appendChild(frame_select_h);
+  /* add frame selection div: */
+  var frame_select_div = document.createElement('div');
+  /* get all frame ids: */
+  var frame_ids = plot_vars['frame_ids'];
+  /* loop through all frame ids: */
+  for (var i = 0; i < frame_ids.length; i++) {
+    /* dreate button for this frame: */
+    var frame_id_button = document.createElement('button');
+    frame_id_button.innerHTML = frame_ids[i];
+    frame_id_button.volcano_name = volcano_name;
+    frame_id_button.frame_id = frame_ids[i];
+    /* add click listener: */
+    frame_id_button.addEventListener('click', function() {
+      /* on click ... update frame id: */
+      plot_vars['frame_id'] = this.frame_id;
+      /* update page: */
+      load_page();
+    });
+    /* disable button for active frame, enable for inaacive: */
+    if (frame_ids[i] == frame_id) {
+      frame_id_button.setAttribute('disabled', true);
+    } else {
+      frame_id_button.removeAttribute('disabled');
+    };
+    /* add button to frame selection div: */
+    frame_select_div.appendChild(frame_id_button);
+  };
+  /* add frame selection div to text div: */
+  text_00_div.appendChild(frame_select_div);
 };
 
 /* function to get list of available frames: */
@@ -136,13 +157,31 @@ async function get_frames() {
   };
   /* all frames: */
   var frame_ids = frames_good.concat(frames_bad);
-  /* sotre all frames and set current frame to first in list: */
+  /* store all frame ids: */
   plot_vars['frame_ids'] = frame_ids;
-  plot_vars['frame_id'] = frame_ids[0];
+  /* if frame id is not set or invalid, set to first frame in list: */
+  if (plot_vars['frame_ids'].indexOf(plot_vars['frame_id']) < 0) {
+    plot_vars['frame_id'] = frame_ids[0];
+  };
 };
 
 /* data loading from json function: */
 async function load_data(data_file, ifg_data=false) {
+  /* if not loading ifg data: */
+  if (ifg_data != true) {
+    /* clear any error text: */
+    var error_div = plot_vars['error_div'];
+    error_div.innerHTML = '';
+    /* clear any plots: */
+    var heatmap_div_a = plot_vars['heatmap_div_a'];
+    heatmap_div_a.innerHTML = '';
+    var heatmap_div_b = plot_vars['heatmap_div_b'];
+    heatmap_div_b.innerHTML = '';
+    var ic_div = plot_vars['ic_div'];
+    ic_div.innerHTML = '';
+    var residuals_div = plot_vars['residuals_div'];
+    residuals_div.innerHTML = '';
+  };
   /* url to data file: */
   let data_url = plot_vars['data_prefix'] + '/' + data_file;
   /* get data using fetch: */
@@ -172,6 +211,13 @@ async function load_data(data_file, ifg_data=false) {
     } else {
       /* plot data is null: */
       plot_vars['plot_data'] = null;
+      /* add error text div: */
+      var error_00_div = document.createElement('div');
+      error_00_div.id = 'error_text_00';
+      error_00_div.classList = 'text_container error text';
+      error_00_div.innerHTML = 'No LiCSAlert data available for frame ' +
+                               plot_vars['frame_id'];
+      error_div.appendChild(error_00_div);
     };
   };
 };
@@ -557,9 +603,6 @@ async function plot_data() {
   var ifg_recon = plot_data['ifg_recon'];
   var ifg_resid = plot_data['ifg_resid'];
 
-  /* add the text to the page: */
-  await add_text(volcano_name, frame_id);
-
   /* calculate some possibly useful values: */
   var lats_min = Math.min.apply(Math, lats);
   var lats_max = Math.max.apply(Math, lats);
@@ -597,11 +640,11 @@ async function plot_data() {
   heatmap_div_b.innerHTML = '';
 
   /* create divs for heatmap plots: */
-  var heatmap_plot_container_a = document.createElement("div");
+  var heatmap_plot_container_a = document.createElement('div');
   heatmap_plot_container_a.id = 'heatmap_plot_container_a';
   heatmap_plot_container_a.classList = 'plot_container';
   heatmap_div_a.appendChild(heatmap_plot_container_a);
-  var heatmap_plot_container_b = document.createElement("div");
+  var heatmap_plot_container_b = document.createElement('div');
   heatmap_plot_container_b.id = 'heatmap_plot_container_b';
   heatmap_plot_container_b.classList = 'plot_container';
   heatmap_div_a.appendChild(heatmap_plot_container_b);
@@ -609,7 +652,7 @@ async function plot_data() {
   /* --- dem plot: --- */
 
   /* create div for heatmap plot: */
-  var heatmap_dem_div = document.createElement("div");
+  var heatmap_dem_div = document.createElement('div');
   var heatmap_dem_id = 'heatmap_dem';
   heatmap_dem_div.id = heatmap_dem_id;
   heatmap_dem_div.classList = 'heatmap_plot';
@@ -649,7 +692,7 @@ async function plot_data() {
   /* --- cumulative ifg plot: --- */
 
   /* create div for heatmap plot: */
-  var heatmap_ifg_cml_div = document.createElement("div");
+  var heatmap_ifg_cml_div = document.createElement('div');
   var heatmap_ifg_cml_id = 'heatmap_ifg_cml';
   heatmap_ifg_cml_div.id = heatmap_ifg_cml_id;
   heatmap_ifg_cml_div.classList = 'heatmap_plot';
@@ -696,7 +739,7 @@ async function plot_data() {
   /* --- incremental ifg plot: --- */
 
   /* create div for heatmap plot: */
-  var heatmap_ifg_inc_div = document.createElement("div");
+  var heatmap_ifg_inc_div = document.createElement('div');
   var heatmap_ifg_inc_id = 'heatmap_ifg_inc';
   heatmap_ifg_inc_div.id = heatmap_ifg_inc_id;
   heatmap_ifg_inc_div.classList = 'heatmap_plot';
@@ -743,7 +786,7 @@ async function plot_data() {
   /* --- reconstruction ifg plot: --- */
 
   /* create div for heatmap plot: */
-  var heatmap_ifg_recon_div = document.createElement("div");
+  var heatmap_ifg_recon_div = document.createElement('div');
   var heatmap_ifg_recon_id = 'heatmap_ifg_recon';
   heatmap_ifg_recon_div.id = heatmap_ifg_recon_id;
   heatmap_ifg_recon_div.classList = 'heatmap_plot';
@@ -792,7 +835,7 @@ async function plot_data() {
   /* --- reconstruction ifg plot: --- */
 
   /* create div for heatmap plot: */
-  var heatmap_ifg_resid_div = document.createElement("div");
+  var heatmap_ifg_resid_div = document.createElement('div');
   var heatmap_ifg_resid_id = 'heatmap_ifg_resid';
   heatmap_ifg_resid_div.id = heatmap_ifg_resid_id;
   heatmap_ifg_resid_div.classList = 'heatmap_plot';
@@ -849,18 +892,18 @@ async function plot_data() {
     var cml = tc_cml[tc_id];
 
     /* create div for ic plots: */
-    var ic_plot_container = document.createElement("div");
+    var ic_plot_container = document.createElement('div');
     ic_plot_container.id = 'ic_plot_container_' + i;
     ic_plot_container.classList = 'plot_container';
     ic_div.appendChild(ic_plot_container);
     /* create div for heatmap plot: */
-    var heatmap_ic_div = document.createElement("div");
+    var heatmap_ic_div = document.createElement('div');
     var heatmap_ic_id = 'heatmap_ic_' + tc_id;
     heatmap_ic_div.id = heatmap_ic_id;
     heatmap_ic_div.classList = 'heatmap_plot';
     ic_plot_container.appendChild(heatmap_ic_div);
     /* create div for ts plot: */
-    var ts_ic_div = document.createElement("div");
+    var ts_ic_div = document.createElement('div');
     var ts_ic_id = 'ts_ic_' + tc_id;
     ts_ic_div.id = ts_ic_id;
     ts_ic_div.classList = 'ts_plot';
@@ -919,18 +962,18 @@ async function plot_data() {
   /* --- residuals plotting: --- */
 
   /* create div for ic plots: */
-  var residuals_plot_container = document.createElement("div");
+  var residuals_plot_container = document.createElement('div');
   residuals_plot_container.id = 'residuals_plot_container';
   residuals_plot_container.classList = 'plot_container';
   residuals_div.appendChild(residuals_plot_container);
   /* create div for heatmap plot: */
-  var heatmap_residuals_div = document.createElement("div");
+  var heatmap_residuals_div = document.createElement('div');
   var heatmap_residuals_id = 'heatmap_residuals';
   heatmap_residuals_div.id = heatmap_residuals_id;
   heatmap_residuals_div.classList = 'heatmap_plot';
   residuals_plot_container.appendChild(heatmap_residuals_div);
   /* create div for ts plot: */
-  var ts_residuals_div = document.createElement("div");
+  var ts_residuals_div = document.createElement('div');
   var ts_residuals_id = 'ts_residuals_' + tc_id;
   ts_residuals_div.id = ts_residuals_id;
   ts_residuals_div.classList = 'ts_plot';
@@ -961,6 +1004,8 @@ async function load_page() {
   await get_frames();
   /* get current frame: */
   var frame_id = plot_vars['frame_id'];
+  /* add the text to the page: */
+  await add_text(volcano_name, frame_id);
   /* data file to load: */
   var data_file = region + '/' + volcano + '_' + frame_id + '/' +
                   plot_vars['data_dir'] + '/licsalert_data.json';
