@@ -20,6 +20,8 @@ var plot_vars = {
   'plot_data': null,
   /* div for heatmap plotting: */
   'heatmap_div': document.getElementById('heatmap_plots'),
+  /* div for slider: */
+  'slider_div': document.getElementById('content_slider'),
   /* min for dem plotting: */
   'dem_min': 0,
   /* colorscale for dem plotting: */
@@ -181,6 +183,9 @@ async function load_data(data_file, ifg_data=false) {
     ic_div.innerHTML = '';
     var residuals_div = plot_vars['residuals_div'];
     residuals_div.innerHTML = '';
+    /* clear slider: */
+    var slider_div = plot_vars['slider_div'];
+    slider_div.innerHTML = '';
   };
   /* url to data file: */
   let data_url = plot_vars['data_prefix'] + '/' + data_file;
@@ -998,18 +1003,13 @@ async function plot_data() {
 
 /* add slider: */
 function add_slider() {
-  /* ifg heatmap div to which slider will be added: */
-  var heatmap_div = plot_vars['heatmap_div'];
+  /* div to which slider will be added: */
+  var slider_container_div = plot_vars['slider_div'];
   /* get dates: */
   var dates = plot_vars['plot_data']['dates'];
   var dates_count = plot_vars['plot_data']['dates_count'];
   var frame_id = plot_vars['frame_id'];
   var ifg_date = plot_vars[frame_id]['ifg_date'];
-  /* add container div for slider: */
-  var slider_container_div = document.createElement('div');
-  slider_container_div.id = 'content_slider_00';
-  slider_container_div.classList = 'content_slider';
-  heatmap_div.appendChild(slider_container_div);
   /* add div for slider: */
   var slider_div = document.createElement('div');
   slider_div.id = 'slider_00';
@@ -1060,7 +1060,7 @@ function add_slider() {
     slider_inc_div.innerHTML = '<label>Incremental date:</label> ' + slider_date;
   });
   /* add change listener: */
-  slider_div.noUiSlider.on('change', function() {
+  slider_div.noUiSlider.on('change', async function() {
     /* get slider value: */
     var slider_value = slider_div.noUiSlider.get();
     /* index to int: */
@@ -1069,8 +1069,13 @@ function add_slider() {
     var slider_date = plot_vars['plot_data']['dates'][slider_index];
     /* store ifg date: */
     plot_vars[frame_id]['ifg_date'] = slider_date;
-    /* update the page: */
-    load_page();
+    /* get current scroll position: */
+    var scroll_x = window.scrollX;
+    var scroll_y = window.scrollY;
+    /* update the plots: */
+    await plot_data();
+    /* scroll in to position: */
+    window.scrollTo(scroll_x, scroll_y);
   });
 };
 
