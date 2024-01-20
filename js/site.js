@@ -54,6 +54,8 @@ var plot_vars = {
   ],
   /* color for baseline plotting: */
   'baseline_color': '#9999ff',
+  /* color for ifg date plotting: */
+  'ifg_date_color': '#ff9999',
   /* div for residuals plotting: */
   'residuals_div': document.getElementById('residuals_plots'),
   /* plotly plot config: */
@@ -386,6 +388,8 @@ function plot_ts(plot_options) {
   var title = plot_options['title'];
   var baseline_end = plot_options['baseline_end'];
   var baseline_color = plot_options['baseline_color'];
+  var ifg_date = plot_options['ifg_date'];
+  var ifg_date_color = plot_options['ifg_date_color'];
   var distances = plot_options['distances'];
   var distance_min = plot_options['distance_min'];
   var distance_max = plot_options['distance_max'];
@@ -425,6 +429,24 @@ function plot_ts(plot_options) {
     'showlegend': false
   };
   data.push(scatter_baseline);
+
+  /* create the ifg date scatter plot: */
+  var scatter_ifg = {
+    'type': 'scatter',
+    'name': '',
+    'x': [ifg_date, ifg_date],
+    'y': [distance_min, distance_max * 2],
+    'yaxis': 'y2',
+    'mode': 'lines',
+    'line': {
+      'color': ifg_date_color
+    },
+    'opacity': 0.8,
+    'hoverinfo': 'text',
+    'text': 'ifg plot date: ' + baseline_end,
+    'showlegend': false
+  };
+  data.push(scatter_ifg);
 
   /* create the bar plot: */
   var scatter_bar = {
@@ -567,6 +589,7 @@ async function plot_data() {
   var distance_max = plot_vars['distance_max'];
   var distance_colorscale = plot_vars['distance_colorscale'];
   var baseline_color = plot_vars['baseline_color'];
+  var ifg_date_color = plot_vars['ifg_date_color'];
   var residuals_div = plot_vars['residuals_div'];
   var plot_conf = plot_vars['plot_conf'];
 
@@ -949,6 +972,8 @@ async function plot_data() {
       'title': '',
       'baseline_end': baseline_end,
       'baseline_color': baseline_color,
+      'ifg_date': ifg_date,
+      'ifg_date_color': ifg_date_color,
       'distances': distances,
       'distance_min': distance_min,
       'distance_max': distance_max,
@@ -988,6 +1013,8 @@ async function plot_data() {
     'title': 'RMS residual',
     'baseline_end': baseline_end,
     'baseline_color': baseline_color,
+    'ifg_date': ifg_date,
+    'ifg_date_color': ifg_date_color,
     'distances': residuals_distances,
     'distance_min': distance_min,
     'distance_max': distance_max,
