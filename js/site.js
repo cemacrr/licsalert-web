@@ -55,7 +55,7 @@ var plot_vars = {
   /* color for baseline plotting: */
   'baseline_color': '#9999ff',
   /* color for ifg date plotting: */
-  'ifg_date_color': '#ff9999',
+  'ifg_date_color': '#99ff99',
   /* div for residuals plotting: */
   'residuals_div': document.getElementById('residuals_plots'),
   /* plotly plot config: */
