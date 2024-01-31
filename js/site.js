@@ -292,7 +292,7 @@ function plot_heatmap(plot_options) {
   for (var i = 0; i < y.length; i++) {
     hovertext[i] = [];
     for (var j = 0; j < x.length; j++) {
-      if (z[i][j] == null) {
+      if ((z[i][j] == null) || (z[i][j] == 'null')) {
         var z_value = 'null';
       } else {
         var z_value = z[i][j].toFixed(z_dp) + z_units;
