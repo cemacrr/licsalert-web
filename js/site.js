@@ -478,7 +478,7 @@ function plot_ts(plot_options) {
       'yaxis': 'y1',
       'mode': 'lines',
       'marker': {
-        'color': '#999999',
+        'color': 'rgba(169, 169, 169, 0.6)',
       },
       'hoverinfo': 'none',
       'showlegend': false
