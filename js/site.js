@@ -147,7 +147,7 @@ async function get_frames() {
     /* data file name for this frame id: */
     var data_file = plot_vars['data_prefix'] + '/' + region + '/' + volcano +
                     '_' + frame_id + '/' + plot_vars['data_dir'] +
-                    '/licsalert_data.json';
+                    '/licsalert_data.json.gz';
 
     /* check data with fetch: */
     var data_url = new Request(data_file, { method: 'HEAD'});
@@ -197,14 +197,23 @@ async function load_data(data_file, ifg_data=false) {
   if (data_req.status == 200) {
     /* store json information from request. if ifg data: */
     if (ifg_data == true) {
-      var req_data = await data_req.json();
+      var req_data = await data_req.arrayBuffer();
+      console.log(req_data);
+      req_data = JSON.parse(
+        pako.ungzip(req_data, {'to': 'string'})
+      );
       plot_vars['plot_data']['ifg_inc'] = req_data['ifg_inc'];
       plot_vars['plot_data']['ifg_cml'] = req_data['ifg_cml'];
       plot_vars['plot_data']['ifg_recon'] = req_data['reconstruction'];
       plot_vars['plot_data']['ifg_resid'] = req_data['residual'];
     /* else, getting plot data: */
     } else {
-      plot_vars['plot_data'] = await data_req.json();
+      var req_data = await data_req.arrayBuffer();
+      console.log(req_data);
+      req_data = JSON.parse(
+        pako.ungzip(req_data, {'to': 'string'})
+      );
+      plot_vars['plot_data'] = req_data;
     };
   } else {
     /* log error: */
@@ -619,7 +628,7 @@ async function plot_data() {
   plot_vars[frame_id]['ifg_date'] = ifg_date;
   /* json file for ifg data: */
   var ifg_data_file = region + '/' + volcano + '_' + frame_id + '/' +
-                      plot_vars['data_dir'] + '/' + ifg_date + '.json';
+                      plot_vars['data_dir'] + '/' + ifg_date + '.json.gz';
   /* load the data: */
   await load_data(ifg_data_file, true);
   /* log data loaded message: */
@@ -1116,7 +1125,7 @@ async function load_page() {
   await add_text(volcano_name, frame_id);
   /* data file to load: */
   var data_file = region + '/' + volcano + '_' + frame_id + '/' +
-                  plot_vars['data_dir'] + '/licsalert_data.json';
+                  plot_vars['data_dir'] + '/licsalert_data.json.gz';
   /* load the data: */
   await load_data(data_file);
   /* if data loading failed, give up: */
