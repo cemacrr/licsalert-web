@@ -450,7 +450,7 @@ function plot_ts(plot_options) {
     },
     'opacity': 0.8,
     'hoverinfo': 'text',
-    'text': 'ifg plot date: ' + baseline_end,
+    'text': 'ifg plot date: ' + ifg_date,
     'showlegend': false
   };
   data.push(scatter_ifg);
