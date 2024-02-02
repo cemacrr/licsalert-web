@@ -198,7 +198,6 @@ async function load_data(data_file, ifg_data=false) {
     /* store json information from request. if ifg data: */
     if (ifg_data == true) {
       var req_data = await data_req.arrayBuffer();
-      console.log(req_data);
       req_data = JSON.parse(
         pako.ungzip(req_data, {'to': 'string'})
       );
@@ -209,7 +208,6 @@ async function load_data(data_file, ifg_data=false) {
     /* else, getting plot data: */
     } else {
       var req_data = await data_req.arrayBuffer();
-      console.log(req_data);
       req_data = JSON.parse(
         pako.ungzip(req_data, {'to': 'string'})
       );
