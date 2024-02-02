@@ -642,7 +642,7 @@ async function plot_data() {
   var lats_max = Math.max.apply(Math, lats);
   var lons_min = Math.min.apply(Math, lons);
   var lons_max = Math.max.apply(Math, lons);
-  var dem_max = Math.max.apply(Math, dem.flat());
+  var dem_max = Math.max.apply(Math, dem.flat().filter(Number.isFinite));
   dem_max = Math.ceil(dem_max / 1000) * 1000;
 
   /* calculate x and y ticks for heatmaps: */
@@ -732,8 +732,12 @@ async function plot_data() {
   heatmap_plot_container_a.appendChild(heatmap_ifg_cml_div);
 
   /* get min and max values: */
-  var ifg_cml_min = Math.min.apply(Math, ifg_cml.flat());
-  var ifg_cml_max = Math.max.apply(Math, ifg_cml.flat());
+  var ifg_cml_min = Math.min.apply(
+    Math, ifg_cml.flat().filter(Number.isFinite)
+  );
+  var ifg_cml_max = Math.max.apply(
+    Math, ifg_cml.flat().filter(Number.isFinite)
+  );
   /* calculate min and max values for plotting: */
   var ifg_cml_z_max = Math.max(Math.abs(ifg_cml_min), Math.abs(ifg_cml_max));
   var ifg_cml_z_min = -1 * ifg_cml_z_max;
@@ -779,8 +783,12 @@ async function plot_data() {
   heatmap_plot_container_b.appendChild(heatmap_ifg_inc_div);
 
   /* get min and max values: */
-  var ifg_inc_min = Math.min.apply(Math, ifg_inc.flat());
-  var ifg_inc_max = Math.max.apply(Math, ifg_inc.flat());
+  var ifg_inc_min = Math.min.apply(
+    Math, ifg_inc.flat().filter(Number.isFinite)
+  );
+  var ifg_inc_max = Math.max.apply(
+    Math, ifg_inc.flat().filter(Number.isFinite)
+  );
   /* calculate min and max values for plotting: */
   var ifg_inc_z_max = Math.max(Math.abs(ifg_inc_min), Math.abs(ifg_inc_max));
   var ifg_inc_z_min = -1 * ifg_inc_z_max;
@@ -826,8 +834,12 @@ async function plot_data() {
   heatmap_plot_container_b.appendChild(heatmap_ifg_recon_div);
 
   /* get min and max values: */
-  var ifg_recon_min = Math.min.apply(Math, ifg_recon.flat());
-  var ifg_recon_max = Math.max.apply(Math, ifg_recon.flat());
+  var ifg_recon_min = Math.min.apply(
+    Math, ifg_recon.flat().filter(Number.isFinite)
+  );
+  var ifg_recon_max = Math.max.apply(
+    Math, ifg_recon.flat().filter(Number.isFinite)
+  );
   /* calculate min and max values for plotting: */
   var ifg_recon_z_max = Math.max(
     Math.abs(ifg_recon_min), Math.abs(ifg_recon_max)
@@ -875,8 +887,12 @@ async function plot_data() {
   heatmap_plot_container_b.appendChild(heatmap_ifg_resid_div);
 
   /* get min and max values: */
-  var ifg_resid_min = Math.min.apply(Math, ifg_resid.flat());
-  var ifg_resid_max = Math.max.apply(Math, ifg_resid.flat());
+  var ifg_resid_min = Math.min.apply(
+    Math, ifg_resid.flat().filter(Number.isFinite)
+  );
+  var ifg_resid_max = Math.max.apply(
+    Math, ifg_resid.flat().filter(Number.isFinite)
+  );
   /* calculate min and max values for plotting: */
   var ifg_resid_z_max = Math.max(
     Math.abs(ifg_resid_min), Math.abs(ifg_resid_max)
