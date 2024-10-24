@@ -1,1 +1,1 @@
-plotly-cartesian-2.24.2.min.js
+plotly-cartesian-2.35.2.min.js
