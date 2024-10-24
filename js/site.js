@@ -201,10 +201,21 @@ async function load_data(data_file, ifg_data=false) {
       req_data = JSON.parse(
         pako.ungzip(req_data, {'to': 'string'})
       );
-      plot_vars['plot_data']['ifg_inc'] = req_data['ifg_inc'];
-      plot_vars['plot_data']['ifg_cml'] = req_data['ifg_cml'];
-      plot_vars['plot_data']['ifg_recon'] = req_data['reconstruction'];
-      plot_vars['plot_data']['ifg_resid'] = req_data['residual'];
+      req_data['ifg_cml'] == undefined ?
+        plot_vars['plot_data']['ifg_cml'] = null :
+        plot_vars['plot_data']['ifg_cml'] = req_data['ifg_cml'];
+      req_data['ifg_inc'] == undefined ?
+        plot_vars['plot_data']['ifg_inc'] = null :
+        plot_vars['plot_data']['ifg_inc'] = req_data['ifg_inc'];
+      req_data['residual_cml'] == undefined ?
+        plot_vars['plot_data']['ifg_resid_cml'] = null :
+        plot_vars['plot_data']['ifg_resid_cml'] = req_data['residual_cml'];
+      req_data['residual'] == undefined ?
+        plot_vars['plot_data']['ifg_resid_inc'] = null :
+        plot_vars['plot_data']['ifg_resid_inc'] = req_data['residual'];
+      req_data['reconstruction'] == undefined ?
+        plot_vars['plot_data']['ifg_recon_inc'] = null :
+        plot_vars['plot_data']['ifg_recon_inc'] = req_data['reconstruction'];
     /* else, getting plot data: */
     } else {
       var req_data = await data_req.arrayBuffer();
@@ -219,8 +230,11 @@ async function load_data(data_file, ifg_data=false) {
     /* if getting ifg data: */
     if (ifg_data == true) {
       /* ifg data is null: */
-      plot_vars['plot_data']['ifg_inc'] = null;
       plot_vars['plot_data']['ifg_cml'] = null;
+      plot_vars['plot_data']['ifg_inc'] = null;
+      plot_vars['plot_data']['ifg_resid_cml'] = null;
+      plot_vars['plot_data']['ifg_resid_inc'] = null;
+      plot_vars['plot_data']['ifg_recon_inc'] = null;
     /* else, getting plot data: */
     } else {
       /* plot data is null: */
@@ -632,10 +646,11 @@ async function plot_data() {
   /* log data loaded message: */
   console.log('* loaded data from file: ' + ifg_data_file);
   /* get ifg data: */
-  var ifg_inc = plot_data['ifg_inc'];
   var ifg_cml = plot_data['ifg_cml'];
-  var ifg_recon = plot_data['ifg_recon'];
-  var ifg_resid = plot_data['ifg_resid'];
+  var ifg_inc = plot_data['ifg_inc'];
+  var ifg_resid_cml = plot_data['ifg_resid_cml'];
+  var ifg_resid_inc = plot_data['ifg_resid_inc'];
+  var ifg_recon_inc = plot_data['ifg_recon_inc'];
 
   /* calculate some possibly useful values: */
   var lats_min = Math.min.apply(Math, lats);
@@ -724,211 +739,284 @@ async function plot_data() {
 
   /* --- cumulative ifg plot: --- */
 
-  /* create div for heatmap plot: */
-  var heatmap_ifg_cml_div = document.createElement('div');
-  var heatmap_ifg_cml_id = 'heatmap_ifg_cml';
-  heatmap_ifg_cml_div.id = heatmap_ifg_cml_id;
-  heatmap_ifg_cml_div.classList = 'heatmap_plot';
-  heatmap_plot_container_a.appendChild(heatmap_ifg_cml_div);
+  if (ifg_cml != null) {
 
-  /* get min and max values: */
-  var ifg_cml_min = Math.min.apply(
-    Math, ifg_cml.flat().filter(Number.isFinite)
-  );
-  var ifg_cml_max = Math.max.apply(
-    Math, ifg_cml.flat().filter(Number.isFinite)
-  );
-  /* calculate min and max values for plotting: */
-  var ifg_cml_z_max = Math.max(Math.abs(ifg_cml_min), Math.abs(ifg_cml_max));
-  var ifg_cml_z_min = -1 * ifg_cml_z_max;
+    /* create div for heatmap plot: */
+    var heatmap_ifg_cml_div = document.createElement('div');
+    var heatmap_ifg_cml_id = 'heatmap_ifg_cml';
+    heatmap_ifg_cml_div.id = heatmap_ifg_cml_id;
+    heatmap_ifg_cml_div.classList = 'heatmap_plot';
+    heatmap_plot_container_a.appendChild(heatmap_ifg_cml_div);
 
-  /* plot options for cumulative ifg heatmap: */
-  var heatmap_ifg_cml_options = {
-    'div': heatmap_ifg_cml_id,
-    'title': 'Cumulative',
-    'x': lons,
-    'x_min': lons_min,
-    'x_max': lons_max,
-    'x_label': 'lon',
-    'x_units': null,
-    'x_dp': 4,
-    'x_ticks': heatmap_x_ticks,
-    'y': lats,
-    'y_min': lats_min,
-    'y_max': lats_max,
-    'y_label': 'lat',
-    'y_units': null,
-    'y_dp': 4,
-    'y_ticks': heatmap_y_ticks,
-    'z': ifg_cml,
-    'z_min': ifg_cml_z_min,
-    'z_max': ifg_cml_z_max,
-    'z_label': 'displacement',
-    'z_units': 'm',
-    'z_dp': 4,
-    'colorscale': ifg_colorscale,
-    'colorbar_title': 'displacement (m)',
-    'conf': plot_conf
+    /* get min and max values: */
+    var ifg_cml_min = Math.min.apply(
+      Math, ifg_cml.flat().filter(Number.isFinite)
+    );
+    var ifg_cml_max = Math.max.apply(
+      Math, ifg_cml.flat().filter(Number.isFinite)
+    );
+    /* calculate min and max values for plotting: */
+    var ifg_cml_z_max = Math.max(Math.abs(ifg_cml_min), Math.abs(ifg_cml_max));
+    var ifg_cml_z_min = -1 * ifg_cml_z_max;
+
+    /* plot options for cumulative ifg heatmap: */
+    var heatmap_ifg_cml_options = {
+      'div': heatmap_ifg_cml_id,
+      'title': 'Cumulative',
+      'x': lons,
+      'x_min': lons_min,
+      'x_max': lons_max,
+      'x_label': 'lon',
+      'x_units': null,
+      'x_dp': 4,
+      'x_ticks': heatmap_x_ticks,
+      'y': lats,
+      'y_min': lats_min,
+      'y_max': lats_max,
+      'y_label': 'lat',
+      'y_units': null,
+      'y_dp': 4,
+      'y_ticks': heatmap_y_ticks,
+      'z': ifg_cml,
+      'z_min': ifg_cml_z_min,
+      'z_max': ifg_cml_z_max,
+      'z_label': 'displacement',
+      'z_units': 'm',
+      'z_dp': 4,
+      'colorscale': ifg_colorscale,
+      'colorbar_title': 'displacement (m)',
+      'conf': plot_conf
+    };
+    /* plot the heatmap: */
+    plot_heatmap(heatmap_ifg_cml_options);
+
   };
-  /* plot the heatmap: */
-  plot_heatmap(heatmap_ifg_cml_options);
 
   /* --- incremental ifg plot: --- */
 
-  /* create div for heatmap plot: */
-  var heatmap_ifg_inc_div = document.createElement('div');
-  var heatmap_ifg_inc_id = 'heatmap_ifg_inc';
-  heatmap_ifg_inc_div.id = heatmap_ifg_inc_id;
-  heatmap_ifg_inc_div.classList = 'heatmap_plot';
-  heatmap_plot_container_b.appendChild(heatmap_ifg_inc_div);
+  if (ifg_inc != null) {
 
-  /* get min and max values: */
-  var ifg_inc_min = Math.min.apply(
-    Math, ifg_inc.flat().filter(Number.isFinite)
-  );
-  var ifg_inc_max = Math.max.apply(
-    Math, ifg_inc.flat().filter(Number.isFinite)
-  );
-  /* calculate min and max values for plotting: */
-  var ifg_inc_z_max = Math.max(Math.abs(ifg_inc_min), Math.abs(ifg_inc_max));
-  var ifg_inc_z_min = -1 * ifg_inc_z_max;
+    /* create div for heatmap plot: */
+    var heatmap_ifg_inc_div = document.createElement('div');
+    var heatmap_ifg_inc_id = 'heatmap_ifg_inc';
+    heatmap_ifg_inc_div.id = heatmap_ifg_inc_id;
+    heatmap_ifg_inc_div.classList = 'heatmap_plot';
+    heatmap_plot_container_b.appendChild(heatmap_ifg_inc_div);
 
-  /* plot options for incremental ifg heatmap: */
-  var heatmap_ifg_inc_options = {
-    'div': heatmap_ifg_inc_id,
-    'title': 'Incremental',
-    'x': lons,
-    'x_min': lons_min,
-    'x_max': lons_max,
-    'x_label': 'lon',
-    'x_units': null,
-    'x_dp': 4,
-    'x_ticks': heatmap_x_ticks,
-    'y': lats,
-    'y_min': lats_min,
-    'y_max': lats_max,
-    'y_label': 'lat',
-    'y_units': null,
-    'y_dp': 4,
-    'y_ticks': heatmap_y_ticks,
-    'z': ifg_inc,
-    'z_min': ifg_inc_z_min,
-    'z_max': ifg_inc_z_max,
-    'z_label': 'displacement',
-    'z_units': 'm',
-    'z_dp': 4,
-    'colorscale': ifg_colorscale,
-    'colorbar_title': 'displacement (m)',
-    'conf': plot_conf
+    /* get min and max values: */
+    var ifg_inc_min = Math.min.apply(
+      Math, ifg_inc.flat().filter(Number.isFinite)
+    );
+    var ifg_inc_max = Math.max.apply(
+      Math, ifg_inc.flat().filter(Number.isFinite)
+    );
+    /* calculate min and max values for plotting: */
+    var ifg_inc_z_max = Math.max(Math.abs(ifg_inc_min), Math.abs(ifg_inc_max));
+    var ifg_inc_z_min = -1 * ifg_inc_z_max;
+
+    /* plot options for incremental ifg heatmap: */
+    var heatmap_ifg_inc_options = {
+      'div': heatmap_ifg_inc_id,
+      'title': 'Incremental',
+      'x': lons,
+      'x_min': lons_min,
+      'x_max': lons_max,
+      'x_label': 'lon',
+      'x_units': null,
+      'x_dp': 4,
+      'x_ticks': heatmap_x_ticks,
+      'y': lats,
+      'y_min': lats_min,
+      'y_max': lats_max,
+      'y_label': 'lat',
+      'y_units': null,
+      'y_dp': 4,
+      'y_ticks': heatmap_y_ticks,
+      'z': ifg_inc,
+      'z_min': ifg_inc_z_min,
+      'z_max': ifg_inc_z_max,
+      'z_label': 'displacement',
+      'z_units': 'm',
+      'z_dp': 4,
+      'colorscale': ifg_colorscale,
+      'colorbar_title': 'displacement (m)',
+      'conf': plot_conf
+    };
+    /* plot the heatmap: */
+    plot_heatmap(heatmap_ifg_inc_options);
+
   };
-  /* plot the heatmap: */
-  plot_heatmap(heatmap_ifg_inc_options);
+
+  /* --- cumulative residual ifg plot: --- */
+
+  if (ifg_resid_cml != null) {
+
+    /* create div for heatmap plot: */
+    var heatmap_ifg_resid_cml_div = document.createElement('div');
+    var heatmap_ifg_resid_cml_id = 'heatmap_ifg_resid_cml';
+    heatmap_ifg_resid_cml_div.id = heatmap_ifg_resid_cml_id;
+    heatmap_ifg_resid_cml_div.classList = 'heatmap_plot';
+    heatmap_plot_container_b.appendChild(heatmap_ifg_resid_cml_div);
+
+    /* get min and max values: */
+    var ifg_resid_cml_min = Math.min.apply(
+      Math, ifg_resid_cml.flat().filter(Number.isFinite)
+    );
+    var ifg_resid_cml_max = Math.max.apply(
+      Math, ifg_resid_cml.flat().filter(Number.isFinite)
+    );
+    /* calculate min and max values for plotting: */
+    var ifg_resid_cml_z_max = Math.max(
+      Math.abs(ifg_resid_cml_min), Math.abs(ifg_resid_cml_max)
+    );
+    var ifg_resid_cml_z_min = -1 * ifg_resid_cml_z_max;
+
+    /* plot options for residual ifg heatmap: */
+    var heatmap_ifg_resid_cml_options = {
+      'div': heatmap_ifg_resid_cml_id,
+      'title': 'Cumulative residual',
+      'x': lons,
+      'x_min': lons_min,
+      'x_max': lons_max,
+      'x_label': 'lon',
+      'x_units': null,
+      'x_dp': 4,
+      'x_ticks': heatmap_x_ticks,
+      'y': lats,
+      'y_min': lats_min,
+      'y_max': lats_max,
+      'y_label': 'lat',
+      'y_units': null,
+      'y_dp': 4,
+      'y_ticks': heatmap_y_ticks,
+      'z': ifg_resid_cml,
+      'z_min': ifg_resid_cml_z_min,
+      'z_max': ifg_resid_cml_z_max,
+      'z_label': 'displacement',
+      'z_units': 'm',
+      'z_dp': 4,
+      'colorscale': ifg_colorscale,
+      'colorbar_title': 'displacement (m)',
+      'conf': plot_conf
+    };
+    /* plot the heatmap: */
+    plot_heatmap(heatmap_ifg_resid_cml_options);
+
+  };
+
+  /* --- incremental residual ifg plot: --- */
+
+  if (ifg_resid_inc != null) {
+
+    /* create div for heatmap plot: */
+    var heatmap_ifg_resid_inc_div = document.createElement('div');
+    var heatmap_ifg_resid_inc_id = 'heatmap_ifg_resid_inc';
+    heatmap_ifg_resid_inc_div.id = heatmap_ifg_resid_inc_id;
+    heatmap_ifg_resid_inc_div.classList = 'heatmap_plot';
+    heatmap_plot_container_b.appendChild(heatmap_ifg_resid_inc_div);
+
+    /* get min and max values: */
+    var ifg_resid_inc_min = Math.min.apply(
+      Math, ifg_resid_inc.flat().filter(Number.isFinite)
+    );
+    var ifg_resid_inc_max = Math.max.apply(
+      Math, ifg_resid_inc.flat().filter(Number.isFinite)
+    );
+    /* calculate min and max values for plotting: */
+    var ifg_resid_inc_z_max = Math.max(
+      Math.abs(ifg_resid_inc_min), Math.abs(ifg_resid_inc_max)
+    );
+    var ifg_resid_inc_z_min = -1 * ifg_resid_inc_z_max;
+
+    /* plot options for residual ifg heatmap: */
+    var heatmap_ifg_resid_inc_options = {
+      'div': heatmap_ifg_resid_inc_id,
+      'title': 'Incremental residual',
+      'x': lons,
+      'x_min': lons_min,
+      'x_max': lons_max,
+      'x_label': 'lon',
+      'x_units': null,
+      'x_dp': 4,
+      'x_ticks': heatmap_x_ticks,
+      'y': lats,
+      'y_min': lats_min,
+      'y_max': lats_max,
+      'y_label': 'lat',
+      'y_units': null,
+      'y_dp': 4,
+      'y_ticks': heatmap_y_ticks,
+      'z': ifg_resid_inc,
+      'z_min': ifg_resid_inc_z_min,
+      'z_max': ifg_resid_inc_z_max,
+      'z_label': 'displacement',
+      'z_units': 'm',
+      'z_dp': 4,
+      'colorscale': ifg_colorscale,
+      'colorbar_title': 'displacement (m)',
+      'conf': plot_conf
+    };
+    /* plot the heatmap: */
+    plot_heatmap(heatmap_ifg_resid_inc_options);
+
+  };
 
   /* --- reconstruction ifg plot: --- */
 
-  /* create div for heatmap plot: */
-  var heatmap_ifg_recon_div = document.createElement('div');
-  var heatmap_ifg_recon_id = 'heatmap_ifg_recon';
-  heatmap_ifg_recon_div.id = heatmap_ifg_recon_id;
-  heatmap_ifg_recon_div.classList = 'heatmap_plot';
-  heatmap_plot_container_b.appendChild(heatmap_ifg_recon_div);
+  if (ifg_recon_inc != null) {
 
-  /* get min and max values: */
-  var ifg_recon_min = Math.min.apply(
-    Math, ifg_recon.flat().filter(Number.isFinite)
-  );
-  var ifg_recon_max = Math.max.apply(
-    Math, ifg_recon.flat().filter(Number.isFinite)
-  );
-  /* calculate min and max values for plotting: */
-  var ifg_recon_z_max = Math.max(
-    Math.abs(ifg_recon_min), Math.abs(ifg_recon_max)
-  );
-  var ifg_recon_z_min = -1 * ifg_recon_z_max;
+    /* create div for heatmap plot: */
+    var heatmap_ifg_recon_inc_div = document.createElement('div');
+    var heatmap_ifg_recon_inc_id = 'heatmap_ifg_recon_inc';
+    heatmap_ifg_recon_inc_div.id = heatmap_ifg_recon_inc_id;
+    heatmap_ifg_recon_inc_div.classList = 'heatmap_plot';
+    heatmap_plot_container_b.appendChild(heatmap_ifg_recon_inc_div);
 
-  /* plot options for reconstruction ifg heatmap: */
-  var heatmap_ifg_recon_options = {
-    'div': heatmap_ifg_recon_id,
-    'title': 'Reconstruction',
-    'x': lons,
-    'x_min': lons_min,
-    'x_max': lons_max,
-    'x_label': 'lon',
-    'x_units': null,
-    'x_dp': 4,
-    'x_ticks': heatmap_x_ticks,
-    'y': lats,
-    'y_min': lats_min,
-    'y_max': lats_max,
-    'y_label': 'lat',
-    'y_units': null,
-    'y_dp': 4,
-    'y_ticks': heatmap_y_ticks,
-    'z': ifg_recon,
-    'z_min': ifg_recon_z_min,
-    'z_max': ifg_recon_z_max,
-    'z_label': 'displacement',
-    'z_units': 'm',
-    'z_dp': 4,
-    'colorscale': ifg_colorscale,
-    'colorbar_title': 'displacement (m)',
-    'conf': plot_conf
+    /* get min and max values: */
+    var ifg_recon_inc_min = Math.min.apply(
+      Math, ifg_recon_inc.flat().filter(Number.isFinite)
+    );
+    var ifg_recon_inc_max = Math.max.apply(
+      Math, ifg_recon_inc.flat().filter(Number.isFinite)
+    );
+    /* calculate min and max values for plotting: */
+    var ifg_recon_inc_z_max = Math.max(
+      Math.abs(ifg_recon_inc_min), Math.abs(ifg_recon_inc_max)
+    );
+    var ifg_recon_inc_z_min = -1 * ifg_recon_inc_z_max;
+
+    /* plot options for reconstruction ifg heatmap: */
+    var heatmap_ifg_recon_inc_options = {
+      'div': heatmap_ifg_recon_inc_id,
+      'title': 'Incremental reconstruction',
+      'x': lons,
+      'x_min': lons_min,
+      'x_max': lons_max,
+      'x_label': 'lon',
+      'x_units': null,
+      'x_dp': 4,
+      'x_ticks': heatmap_x_ticks,
+      'y': lats,
+      'y_min': lats_min,
+      'y_max': lats_max,
+      'y_label': 'lat',
+      'y_units': null,
+      'y_dp': 4,
+      'y_ticks': heatmap_y_ticks,
+      'z': ifg_recon_inc,
+      'z_min': ifg_recon_inc_z_min,
+      'z_max': ifg_recon_inc_z_max,
+      'z_label': 'displacement',
+      'z_units': 'm',
+      'z_dp': 4,
+      'colorscale': ifg_colorscale,
+      'colorbar_title': 'displacement (m)',
+      'conf': plot_conf
+    };
+    /* plot the heatmap: */
+    plot_heatmap(heatmap_ifg_recon_inc_options);
+
   };
-  /* plot the heatmap: */
-  plot_heatmap(heatmap_ifg_recon_options);
-
-  /* --- reconstruction ifg plot: --- */
-
-  /* create div for heatmap plot: */
-  var heatmap_ifg_resid_div = document.createElement('div');
-  var heatmap_ifg_resid_id = 'heatmap_ifg_resid';
-  heatmap_ifg_resid_div.id = heatmap_ifg_resid_id;
-  heatmap_ifg_resid_div.classList = 'heatmap_plot';
-  heatmap_plot_container_b.appendChild(heatmap_ifg_resid_div);
-
-  /* get min and max values: */
-  var ifg_resid_min = Math.min.apply(
-    Math, ifg_resid.flat().filter(Number.isFinite)
-  );
-  var ifg_resid_max = Math.max.apply(
-    Math, ifg_resid.flat().filter(Number.isFinite)
-  );
-  /* calculate min and max values for plotting: */
-  var ifg_resid_z_max = Math.max(
-    Math.abs(ifg_resid_min), Math.abs(ifg_resid_max)
-  );
-  var ifg_resid_z_min = -1 * ifg_resid_z_max;
-
-  /* plot options for residual ifg heatmap: */
-  var heatmap_ifg_resid_options = {
-    'div': heatmap_ifg_resid_id,
-    'title': 'Residual',
-    'x': lons,
-    'x_min': lons_min,
-    'x_max': lons_max,
-    'x_label': 'lon',
-    'x_units': null,
-    'x_dp': 4,
-    'x_ticks': heatmap_x_ticks,
-    'y': lats,
-    'y_min': lats_min,
-    'y_max': lats_max,
-    'y_label': 'lat',
-    'y_units': null,
-    'y_dp': 4,
-    'y_ticks': heatmap_y_ticks,
-    'z': ifg_resid,
-    'z_min': ifg_resid_z_min,
-    'z_max': ifg_resid_z_max,
-    'z_label': 'displacement',
-    'z_units': 'm',
-    'z_dp': 4,
-    'colorscale': ifg_colorscale,
-    'colorbar_title': 'displacement (m)',
-    'conf': plot_conf
-  };
-  /* plot the heatmap: */
-  plot_heatmap(heatmap_ifg_resid_options);
 
   /* --- ic plotting: --- */
 
