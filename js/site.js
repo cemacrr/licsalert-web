@@ -688,14 +688,10 @@ async function plot_data() {
   heatmap_div.innerHTML = '';
 
   /* create divs for heatmap plots: */
-  var heatmap_plot_container_a = document.createElement('div');
-  heatmap_plot_container_a.id = 'heatmap_plot_container_a';
-  heatmap_plot_container_a.classList = 'plot_container';
-  heatmap_div.appendChild(heatmap_plot_container_a);
-  var heatmap_plot_container_b = document.createElement('div');
-  heatmap_plot_container_b.id = 'heatmap_plot_container_b';
-  heatmap_plot_container_b.classList = 'plot_container';
-  heatmap_div.appendChild(heatmap_plot_container_b);
+  var heatmap_plot_container = document.createElement('div');
+  heatmap_plot_container.id = 'heatmap_plot_container';
+  heatmap_plot_container.classList = 'plot_container';
+  heatmap_div.appendChild(heatmap_plot_container);
 
   /* --- dem plot: --- */
 
@@ -704,7 +700,7 @@ async function plot_data() {
   var heatmap_dem_id = 'heatmap_dem';
   heatmap_dem_div.id = heatmap_dem_id;
   heatmap_dem_div.classList = 'heatmap_plot';
-  heatmap_plot_container_a.appendChild(heatmap_dem_div);
+  heatmap_plot_container.appendChild(heatmap_dem_div);
 
   /* plot options for dem heatmap: */
   var heatmap_dem_options = {
@@ -746,7 +742,7 @@ async function plot_data() {
     var heatmap_ifg_cml_id = 'heatmap_ifg_cml';
     heatmap_ifg_cml_div.id = heatmap_ifg_cml_id;
     heatmap_ifg_cml_div.classList = 'heatmap_plot';
-    heatmap_plot_container_a.appendChild(heatmap_ifg_cml_div);
+    heatmap_plot_container.appendChild(heatmap_ifg_cml_div);
 
     /* get min and max values: */
     var ifg_cml_min = Math.min.apply(
@@ -801,7 +797,7 @@ async function plot_data() {
     var heatmap_ifg_inc_id = 'heatmap_ifg_inc';
     heatmap_ifg_inc_div.id = heatmap_ifg_inc_id;
     heatmap_ifg_inc_div.classList = 'heatmap_plot';
-    heatmap_plot_container_b.appendChild(heatmap_ifg_inc_div);
+    heatmap_plot_container.appendChild(heatmap_ifg_inc_div);
 
     /* get min and max values: */
     var ifg_inc_min = Math.min.apply(
@@ -856,7 +852,7 @@ async function plot_data() {
     var heatmap_ifg_resid_cml_id = 'heatmap_ifg_resid_cml';
     heatmap_ifg_resid_cml_div.id = heatmap_ifg_resid_cml_id;
     heatmap_ifg_resid_cml_div.classList = 'heatmap_plot';
-    heatmap_plot_container_b.appendChild(heatmap_ifg_resid_cml_div);
+    heatmap_plot_container.appendChild(heatmap_ifg_resid_cml_div);
 
     /* get min and max values: */
     var ifg_resid_cml_min = Math.min.apply(
@@ -913,7 +909,7 @@ async function plot_data() {
     var heatmap_ifg_resid_inc_id = 'heatmap_ifg_resid_inc';
     heatmap_ifg_resid_inc_div.id = heatmap_ifg_resid_inc_id;
     heatmap_ifg_resid_inc_div.classList = 'heatmap_plot';
-    heatmap_plot_container_b.appendChild(heatmap_ifg_resid_inc_div);
+    heatmap_plot_container.appendChild(heatmap_ifg_resid_inc_div);
 
     /* get min and max values: */
     var ifg_resid_inc_min = Math.min.apply(
@@ -970,7 +966,7 @@ async function plot_data() {
     var heatmap_ifg_recon_inc_id = 'heatmap_ifg_recon_inc';
     heatmap_ifg_recon_inc_div.id = heatmap_ifg_recon_inc_id;
     heatmap_ifg_recon_inc_div.classList = 'heatmap_plot';
-    heatmap_plot_container_b.appendChild(heatmap_ifg_recon_inc_div);
+    heatmap_plot_container.appendChild(heatmap_ifg_recon_inc_div);
 
     /* get min and max values: */
     var ifg_recon_inc_min = Math.min.apply(
