@@ -1173,7 +1173,7 @@ function add_slider() {
     'start': dates.indexOf(ifg_date),
     'range': {
       'min': 0,
-      'max': dates_count
+      'max': dates_count - 1
     },
     'step': 1,
     'margin': 1,
