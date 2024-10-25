@@ -1176,7 +1176,6 @@ function add_slider() {
       'max': dates_count - 1
     },
     'step': 1,
-    'margin': 1,
     'tooltips': false,
   });
   /* add slide listener: */
